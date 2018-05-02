@@ -13,6 +13,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 
 public class AppSTL {
+	public static ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 
 	public static void main(String[] args) throws Exception {
 
@@ -20,109 +21,99 @@ public class AppSTL {
 		FileOutputStream fos = new FileOutputStream("zimbabwe.stl");
 		DataOutputStream dos = new DataOutputStream(fos);
 
-		//Ecriture du commentaire du fichier STL (80 octets)
-		for(int i=0;i<20;i++){
-			dos.writeInt(0);
-		}
-
 		//Recuperation des donnees du fichier shp
 		ShpFile file = new ShpFile("ne_50m_admin_0_sovereignty.shp");
 		ArrayList<SimpleFeature> features = file.readFile();
+		
+	
 
 		//Parcours toute la structure
-		for(SimpleFeature feature:features)
-		{
+		for(SimpleFeature feature:features){
 			if(feature.getID().equals("ne_50m_admin_0_sovereignty.200")){
-				//System.out.println(feature.getAttribute("the_geom"));
-
-				// Verification de la figure geometrique et recuperation des points
+				
+				// Verification de la figure geometrique
 				String s = feature.getAttribute("the_geom").toString();
+				
 				//if(s.indexOf("GEOMETRYCOLLECTION")!=-1){}
 				if(s.indexOf("POINT ZM")!=-1){
-					s=s.substring(11,s.length());
 				}
 				else if(s.indexOf("POINT M")!=-1){
-					s=s.substring(10,s.length());
 				}else if(s.indexOf("POINT EMPTY")!=-1){
-					s=s.substring(14,s.length());
 				}else if(s.indexOf("MULTIPOINT")!=-1){
-					s=s.substring(13,s.length());
 				}else if(s.indexOf("POINT")!=-1){
-					s=s.substring(8,s.length());
 				}else if(s.indexOf("MULTILINESTRING")!=-1){
-					s=s.substring(18,s.length());
 				}else if(s.indexOf("LINESTRING")!=-1){
-					s=s.substring(13,s.length());
 				}else if(s.indexOf("MULTIPOLYGON EMPTY")!=-1){
-					s=s.substring(21,s.length());
 				}else if(s.indexOf("MULTIPOLYGON")!=-1){
 					MultiPolygon mp = (MultiPolygon) feature.getAttribute("the_geom");
-					Polygon polys;
-					int nb_triangle=0;
-
-					//Ecriture du nombre de triangles dans le fichier STL
-					for(int i=0;i< mp.getNumGeometries(); i++){
-						polys = ((Polygon)mp.getGeometryN(i));
-						nb_triangle=nb_triangle+polys.getNumPoints()-2;
-					}
-					writeIntLE(dos,nb_triangle);
-
-					//Divise le multipolygon en polygon
-					for (int i = 0; i < mp.getNumGeometries(); i++) {
-						polys = ((Polygon)mp.getGeometryN(i));
-						System.out.println("*******************\n\n\n\ntest polys "+polys);
-						polygonSTL(polys, dos);
-					}
+					decomposeMultiPolygon(mp);
 				}else if(s.indexOf("POLYGON")!=-1){
-					s=s.substring(10,s.length());
 				}
 			}
 		}
+		System.out.println(liste_triangle.size());
+
+	}
+	
+	
+	//Divise le multipolygon en polygon
+	public static void decomposeMultiPolygon(MultiPolygon mp){
+		Polygon polys;
+		for (int i = 0; i < mp.getNumGeometries(); i++) {
+			polys = ((Polygon)mp.getGeometryN(i));
+			polygonSTL(polys);
+		}
 	}
 
-	//Recupere un triangle qui compose le polygone et l'enleve du polygon
-	public static void polygonSTL(Polygon polys, DataOutputStream dos){
+	
+	//Recupere un triangle qui compose le polygone et stock les points du triangle
+	public static void polygonSTL(Polygon polys){
 		Polygon triangle;
+		Point3D[] point= new Point3D[3];
+		System.out.println("*****-------------------"+polys.getNumPoints());
+
 		while(polys.getNumPoints()!=4){
 			//System.out.println(polys);
+			System.out.println(polys.getNumPoints());
+
 			triangle = trianglePolygon(polys);
-			polys=enlevePointPolygon(polys,triangle);			 
-			//System.out.println(polys);
-			System.out.println("BINGO");
+			//System.out.println("---"+triangle.getNumPoints());
+			//System.out.println("---"+triangle);
+			polys=enlevePointPolygon(polys,triangle);
+			Coordinate[] coord_triangle=triangle.getCoordinates();
+			for(int i=0;i<3;i++)
+				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
+			Triangle tri = new Triangle(point);
+			liste_triangle.add(tri);
 		}
+		Coordinate[] coord_polys=polys.getCoordinates();
+		for(int i=0;i<3;i++)
+			point[i] = new Point3D((float) coord_polys[i].x,0.0f,(float) coord_polys[i].y);
+		Triangle tri = new Triangle(point);
+		liste_triangle.add(tri);
+		System.out.println("-------------------*****"+polys.getNumPoints());
 	}
 	
-	//Enleve un point du polygon
+	
+	
+	//Réalise la soustraction entre polygon 
 	public static Polygon enlevePointPolygon(Polygon polys, Polygon triangle){
-		
-		/*Coordinate[] coord_polys=polys.getCoordinates();
-		Coordinate[] coord_triangle=triangle.getCoordinates();
-		GeometryFactory fact = new GeometryFactory();
-		Coordinate[] coord = new Coordinate[polys.getNumPoints()-1];
-		int j=0;
-		if(coord_polys[0]==coord_triangle[1]){
-			for(int i=1;i<polys.getNumPoints()-1;i++){
-				coord[j]=coord_polys[i];
-				j++;
+		if(polys.getNumPoints()-1!=polys.difference(triangle).getNumPoints()){
+			MultiPolygon mp = (MultiPolygon)polys.difference(triangle);
+			for (int i = 1; i < mp.getNumGeometries(); i++) {
+				polys = ((Polygon)mp.getGeometryN(i));
+				polygonSTL(polys);
 			}
-			coord[polys.getNumGeometries()-1]=coord_polys[1];
-		}else{
-			for(int i=0;i<polys.getNumPoints();i++){
-				if(coord_polys[i].compareTo(coord_triangle[1])==0){
-					i++;
-				}
-				coord[j]=coord_polys[i];
-				j++;
-			}
+			return (Polygon)mp.getGeometryN(0);
 		}
-		Polygon newpolys =fact.createPolygon(coord);	*/	
-		
-		System.out.println("before diff " + polys);
-		System.out.println("triangle " + triangle);
-				System.out.println("diff" +  polys.difference(triangle).getGeometryN(0));
-		return (Polygon) polys.difference(triangle);
+		//System.out.println("***"+polys.getNumPoints());
+		//System.out.println("***"+polys.difference(triangle).getNumPoints());
+		//System.out.println("***"+polys.difference(triangle));
+		return (Polygon) polys.difference(triangle).getGeometryN(0);
 	}
 	
+	
+	//Recupere un triangle qui est a l'interieur du polygon
 	public static Polygon trianglePolygon(Polygon polys){
 		int longueur = polys.getNumPoints();
 		if(longueur==4)
@@ -148,44 +139,6 @@ public class AppSTL {
 		
 	}
 
-	//Recupere un triangle qui est a l'interieur du polygon
-	public static Polygon trianglePolygon3(Polygon polys){
-		Polygon triangle;
-		int point_debut=0;
-		int point_fin=2;
-		int cpt_test_point=0;
-
-		while(polys.getNumPoints()!=4){
-			System.out.println(polys.getNumPoints());
-			while(cpt_test_point!=polys.getNumPoints()-4){
-				if(orientationPolygon(polys,point_debut,point_fin)){
-					triangle=newPolygon(polys,point_debut,point_fin);
-				}
-				else{
-					triangle=newPolygon(polys,point_fin,point_debut);
-				}
-				System.out.println("DECOUPAGE PAS"+" - "+triangle.getNumPoints() + " " +polys.contains(triangle));
-				System.out.println("DECOUPAGE PAS"+" - "+polys);
-				System.out.println("DECOUPAGE PAS"+" - "+triangle);
-				if(polys.contains(triangle)){
-					System.out.println("DECOUPAGE");
-					if(triangle.getNumPoints()==4){
-						System.out.println("YOUPI2");
-						return triangle;
-					}
-					polys=trianglePolygon(triangle);
-					cpt_test_point=polys.getNumPoints()-5;
-				}
-				System.out.println("DECOUPAGE PAS"+" - "+triangle.getNumPoints());
-				cpt_test_point++;
-				point_fin++;
-			}
-			cpt_test_point=0;
-			point_debut++;
-		}
-		System.out.println("YOUPI");
-		return polys;
-	}
 
 	//Renvoie true si le petit polygon va de A vers B
 	public static boolean orientationPolygon(Polygon polys,int pointA, int pointB){
@@ -224,21 +177,17 @@ public class AppSTL {
 		if(mSize>dist)
 			mSize=dist;
 		mSize=mSize+2;
-		//System.out.println(pointA+" - "+pointB);
-		//System.out.println("aaaaaaaaa "+mSize+" - "+coord_polys.length);
 		Coordinate[] coords = new Coordinate[mSize];
 		int j = 0;
 		for(int i = pointA;j<mSize;i++){
 			
 			if(i%coord_polys.length == coord_polys.length-1)
 				i++;
-			//System.out.println(coord_polys[i%coord_polys.length]+" - "+i+" - "+i%coord_polys.length);
 			coords[j] = coord_polys[i%coord_polys.length];
 			j++;
 		}
 		coords[mSize-1]=coord_polys[pointA];
 		Polygon newpolys =fact.createPolygon(coords);
-		System.out.println(newpolys);
 		return newpolys;
 	}
 

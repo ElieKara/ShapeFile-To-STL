@@ -16,13 +16,11 @@ import org.opengis.filter.Filter;
 
 public class ShpFile extends File {
 	
-	public ShpFile(String fileName)
-	{
-		super(fileName);
+	public ShpFile(String fileName){
+		super(fileName);		
 	}
 	
-	public ArrayList<SimpleFeature> readFile() throws IOException
-	{
+	public ArrayList<SimpleFeature> readFile() throws IOException{
 		Map<String, Object> map = new HashMap<>();
 		map.put("url", this.toURI().toURL());
 		DataStore dataStore = DataStoreFinder.getDataStore(map);
@@ -31,9 +29,10 @@ public class ShpFile extends File {
 		Filter filter = Filter.INCLUDE;
 		FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(filter);
 		FeatureIterator<SimpleFeature> features = collection.features();
-		ArrayList<SimpleFeature> res = new ArrayList<SimpleFeature>();
+		ArrayList<SimpleFeature> res = new ArrayList<SimpleFeature>();		
 		while(features.hasNext())
 			res.add(features.next());
+		features.close();
 		return res;
 	}
 

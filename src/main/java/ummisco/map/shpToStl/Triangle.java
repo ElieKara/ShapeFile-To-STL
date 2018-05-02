@@ -3,8 +3,8 @@ package ummisco.map.shpToStl;
 public class Triangle {
 	Point3D[] points;
 	
-	public Triangle() {
-		points = new Point3D[3];
+	public Triangle(Point3D[] point) {
+		this.points = point;
 	}
 
 	Byte[] toSTL()
