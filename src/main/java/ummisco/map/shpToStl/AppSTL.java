@@ -26,7 +26,7 @@ public class AppSTL {
 		}
 
 		//Recuperation des donnees du fichier shp
-		ShpFile file = new ShpFile("ne_50m_admin_0_sovereignty.shp");
+		ShpFile file = new ShpFile("../FichierAutre/ne_50m_admin_0_sovereignty.shp");
 		ArrayList<SimpleFeature> features = file.readFile();
 
 		//Parcours toute la structure
