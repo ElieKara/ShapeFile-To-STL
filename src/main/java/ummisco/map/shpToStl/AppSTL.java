@@ -31,6 +31,7 @@ public class AppSTL {
 
 		//Parcours toute la structure
 		for(SimpleFeature feature:features){
+			if(feature.getID().equals("ne_50m_admin_0_sovereignty.200")){
 				// Verification de la figure geometrique
 				String s = feature.getAttribute("the_geom").toString();
 				
@@ -51,6 +52,7 @@ public class AppSTL {
 					Polygon polys = (Polygon) feature.getAttribute("the_geom");
 					polygonSTL(polys);
 				}
+			}
 		}
 		WriteSTL stl = new WriteSTL(liste_triangle,dos);
 		stl.ecrireCommentaire();
@@ -72,16 +74,41 @@ public class AppSTL {
 	
 	//Recupere tous les triangles du polygon et les convertie en Triangle
 	public static void polygonSTL(Polygon polys){
+		epaisseurTriangle(polys);
 		ArrayList<Polygon> triangles = trianglePolygon(polys);
 		for(Polygon p:triangles){
-			Point3D[] point= new Point3D[3];
+			Point3D[] point = new Point3D[3];
+			Point3D[] point2 = new Point3D[3];
 			Coordinate[] coord_triangle=p.getCoordinates();
 			for(int i=0;i<3;i++){
 				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
+				point2[i] = new Point3D((float) coord_triangle[i].x,1.0f,(float) coord_triangle[i].y);
 			}
 			Triangle tri = new Triangle(point);
+			Triangle tri2 = new Triangle(point2);
 			liste_triangle.add(tri);
+			liste_triangle.add(tri2);
 		}
+	}
+	
+	//Construit les triangles pour l'épaisseur
+	public static void epaisseurTriangle(Polygon polys){
+		for(int i=0;i<polys.getNumPoints()-1;i++){
+			Point3D[] point = new Point3D[3];
+			Point3D[] point2 = new Point3D[3];
+			Coordinate[] coord_polys=polys.getCoordinates();
+			point[0]= new Point3D ((float) coord_polys[i].x,0.0f,(float) coord_polys[i].y);
+			point2[0]= new Point3D ((float) coord_polys[i].x,1.0f,(float) coord_polys[i].y);
+			point[1]= new Point3D ((float) coord_polys[i+1].x,0.0f,(float) coord_polys[i+1].y);
+			point2[1]= new Point3D ((float) coord_polys[i+1].x,1.0f,(float) coord_polys[i+1].y);
+			point[2]= point2[1];
+			point2[2]= point[0];
+			Triangle tri = new Triangle(point);
+			Triangle tri2 = new Triangle(point2);
+			liste_triangle.add(tri);
+			liste_triangle.add(tri2);
+		}
+			
 	}
 	
 	
