@@ -2,7 +2,6 @@ package ummisco.map.shpToStl;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -24,7 +23,7 @@ public class AppSTL {
 		DataOutputStream dos = new DataOutputStream(fos);
 
 		//Recuperation des donnees du fichier shp
-		ShpFile file = new ShpFile("stl_map.shp");
+		ShpFile file = new ShpFile("ne_50m_admin_0_sovereignty.shp");
 		//ne_50m_admin_0_sovereignty
 		ArrayList<SimpleFeature> features = file.readFile();
 		
@@ -32,7 +31,6 @@ public class AppSTL {
 
 		//Parcours toute la structure
 		for(SimpleFeature feature:features){
-			//if(feature.getID().equals("ne_50m_admin_0_sovereignty.200")){
 				// Verification de la figure geometrique
 				String s = feature.getAttribute("the_geom").toString();
 				
@@ -53,9 +51,7 @@ public class AppSTL {
 					Polygon polys = (Polygon) feature.getAttribute("the_geom");
 					polygonSTL(polys);
 				}
-			}
-		//}
-		System.out.println(liste_triangle.size());
+		}
 		WriteSTL stl = new WriteSTL(liste_triangle,dos);
 		stl.ecrireCommentaire();
 		stl.ecrireNbTriangle();
@@ -74,42 +70,28 @@ public class AppSTL {
 	}
 
 	
-	//Recupere un triangle qui compose le polygone et stock les points du triangle
+	//Recupere tous les triangles du polygon et les convertie en Triangle
 	public static void polygonSTL(Polygon polys){
-		Point3D[] point= new Point3D[3];
 		ArrayList<Polygon> triangles = trianglePolygon(polys);
 		for(Polygon p:triangles){
+			Point3D[] point= new Point3D[3];
 			Coordinate[] coord_triangle=p.getCoordinates();
-			for(int i=0;i<3;i++)
+			for(int i=0;i<3;i++){
 				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
+			}
 			Triangle tri = new Triangle(point);
 			liste_triangle.add(tri);
 		}
 	}
 	
 	
-	
-	//Réalise la soustraction entre polygon 
-	public static Polygon enlevePointPolygon(Polygon polys, Polygon triangle){
-		if(polys.getNumPoints()-1!=polys.difference(triangle).getNumPoints()){
-			MultiPolygon mp = (MultiPolygon)polys.difference(triangle);
-			for (int i = 1; i < mp.getNumGeometries(); i++) {
-				polys = ((Polygon)mp.getGeometryN(i));
-				polygonSTL(polys);
-			}
-			return (Polygon)mp.getGeometryN(0);
-		}
-		return (Polygon) polys.difference(triangle);
-	}
-	
-	
-	//Recupere un triangle qui est a l'interieur du polygon
+	//Recupere tous les triangles de la geometrie
 	public static ArrayList<Polygon> trianglePolygon(Polygon polys){
 		ArrayList<Polygon> allTriangle = new ArrayList<Polygon>();
 		return trianglePolygon(polys,allTriangle);
 	}	
 	
-	
+	//Trouve une oreille la stock dans liste des triangles et la soustrait au polygone du debut
 	private static ArrayList<Polygon> trianglePolygon(Polygon polys,ArrayList<Polygon> allTriangle ){
 		int longueur = polys.getNumPoints();
 		if(longueur == 4 ){
@@ -128,7 +110,7 @@ public class AppSTL {
 		return allTriangle;
 	}	
 	
-	
+	//Verifie si le triangle est une oreille
 	public static boolean isHear(Polygon polys,Polygon triangle ){
 		if(!polys.contains(triangle))
 			return false;
@@ -138,7 +120,7 @@ public class AppSTL {
 		return false;
 	}
 	
-	
+	//Genere un triangle avec 3 coordonnees
 	public static Polygon generateTriangle(Coordinate a, Coordinate b, Coordinate c){
 		GeometryFactory fact = new GeometryFactory();
 		Coordinate[] coords = {a,b,c,a};
