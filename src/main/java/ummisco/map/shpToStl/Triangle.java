@@ -7,8 +7,7 @@ public class Triangle {
 		this.points = point;
 	}
 
-	Byte[] toSTL()
-	{
+	Byte[] toSTL(){
 		Byte[] res = new Byte[50];
 		for(int i =0; res.length>i; i++)
 			res[i] = 0;
@@ -18,8 +17,7 @@ public class Triangle {
 		return res;
 	}
 	
-	private void pushPoint(Byte[] data, Point3D p, int id)
-	{
+	private void pushPoint(Byte[] data, Point3D p, int id){
 		int index = 12;
 		int myIndex = id*12 + index;
 		data[myIndex] = (byte)((int)(p.getX()) & 0xFF);
@@ -36,8 +34,10 @@ public class Triangle {
 		data[myIndex+10] = (byte)((int)(p.getZ()) >> 8 & 0xFF);
 		data[myIndex+11] = (byte)((int)(p.getZ()) >> 16 & 0xFF);
 		data[myIndex+12] = (byte)((int)(p.getZ()) >> 24 & 0xFF);
-
+	}
 	
+	public Point3D[] getPoint3D(){
+		return points;
 	}
 	
 	
