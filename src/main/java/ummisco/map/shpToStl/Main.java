@@ -10,7 +10,10 @@ import com.vividsolutions.jts.geom.Polygon;
 public class Main {
 
 	public static void main(String[] args) throws Exception {
-		ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
+		
+		Interface fenetre = new Interface();
+		
+		/*ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 		GeometryToTriangle gtt = new GeometryToTriangle(liste_triangle);
 
 		//Cree fichier STL
@@ -25,7 +28,7 @@ public class Main {
 		for(SimpleFeature feature:features){
 			System.out.println(feature.getAttribute("NAME")+" - "+feature.getID());
 			if(feature.getID().equals("ne_50m_admin_0_sovereignty.89")){
-				System.out.println(feature.getAttribute("NAME"));
+				
 				// Verification de la figure geometrique
 				String s = feature.getAttribute("the_geom").toString();
 				//if(s.indexOf("GEOMETRYCOLLECTION")!=-1){}
@@ -51,6 +54,6 @@ public class Main {
 		WriteSTL stl = new WriteSTL(liste_triangle,dos);
 		stl.ecrireCommentaire();
 		stl.ecrireNbTriangle();
-		stl.ecrireTriangles();
+		stl.ecrireTriangles();*/
 	}
 }
