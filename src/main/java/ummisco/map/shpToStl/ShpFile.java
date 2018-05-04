@@ -20,6 +20,8 @@ public class ShpFile extends File {
 		super(fileName);		
 	}
 	
+	
+	//Ouverture du fichier ShapeFile
 	public ArrayList<SimpleFeature> readFile() throws IOException{
 		Map<String, Object> map = new HashMap<>();
 		map.put("url", this.toURI().toURL());
