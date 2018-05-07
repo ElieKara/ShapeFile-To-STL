@@ -12,7 +12,6 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		
 		Interface fenetre = new Interface();
-		
 		/*ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 		GeometryToTriangle gtt = new GeometryToTriangle(liste_triangle);
 

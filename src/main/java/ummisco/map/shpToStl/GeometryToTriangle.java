@@ -7,8 +7,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
-
-
 public class GeometryToTriangle {
 	
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
