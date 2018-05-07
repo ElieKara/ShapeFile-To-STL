@@ -50,6 +50,7 @@ public class Interface{
 		label.setBackground(couleurLabel);
 		label.setOpaque(true);
 		panel2.setBackground(couleurLabel);
+		Controleur controleur = new Controleur(fenetre,panel2);
 		choix.addActionListener(controleur);
 		convertir.addActionListener(controleur);
 		panel.add(choix);

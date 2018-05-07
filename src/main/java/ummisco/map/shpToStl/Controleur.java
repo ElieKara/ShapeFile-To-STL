@@ -36,7 +36,13 @@ public class Controleur implements ActionListener{
 			choixFichier();
 		}
 		else if(text.equals("Convertir en STL")){
-
+			Conversion conv = new Conversion(liste_shapefile);
+			for(int i=0;i<liste_shapefile.size();i++){
+				liste_shapefile.remove(0);
+				liste_nomfichier.remove(0);
+				liste_bouton.remove(0);
+			}
+			panel.removeAll();
 		}
 		else{
 			supprimeShapeFile(e);
