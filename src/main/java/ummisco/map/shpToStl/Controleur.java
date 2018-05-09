@@ -19,14 +19,17 @@ public class Controleur implements ActionListener{
 	private ArrayList<File> liste_shapefile = new ArrayList<File>();
 	private ArrayList<JButton> liste_bouton = new ArrayList<JButton>();
 	private ArrayList<JLabel> liste_nomfichier = new ArrayList<JLabel>();
+	private ArrayList<String> liste_cpt = new ArrayList<String>();
 	private JFrame fenetre;
 	private FileFilter shp;
 	private JPanel panel;
+	private int cpt;
 
 	public Controleur(JFrame fenetre, JPanel panel){
 		this.fenetre=fenetre;
 		this.panel=panel;
 		this.shp = new FileNameExtensionFilter("ShapeFile","shp");
+		this.cpt=0;
 	}
 
 
@@ -37,19 +40,24 @@ public class Controleur implements ActionListener{
 		if(text.equals("Nouveau ShapeFile")){
 			choixFichier();
 		}
-		else if(text.equals("Convertir en STL")){
-			Conversion conv = new Conversion(liste_shapefile);
-			try {
-				conv.parcoursFichier();
-			} catch (IOException e1) {
-				e1.printStackTrace();
+		else if(text.equals("Suivant")){
+			if(liste_shapefile.size()!=0){
+				//Conversion conv = new Conversion(liste_shapefile);	
+				/*try {
+					conv.parcoursFichier();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}*/
+				fenetre.setVisible(false);
+				InterfaceValidation interval = new InterfaceValidation(liste_shapefile,fenetre);
+				for(int i=0;i<liste_shapefile.size();i++){
+					liste_shapefile.remove(0);
+					liste_nomfichier.remove(0);
+					liste_bouton.remove(0);
+					liste_cpt.remove(0);
+				}
+				panel.removeAll();
 			}
-			for(int i=0;i<liste_shapefile.size();i++){
-				liste_shapefile.remove(0);
-				liste_nomfichier.remove(0);
-				liste_bouton.remove(0);
-			}
-			panel.removeAll();
 		}
 		else{
 			supprimeShapeFile(e);
@@ -70,9 +78,11 @@ public class Controleur implements ActionListener{
 			fichier.setHorizontalAlignment(SwingConstants.CENTER);
 			panel.add(fichier);
 			JButton bouton = new JButton("Supprimer");
-			bouton.setActionCommand(nomfichier.getName());
+			bouton.setActionCommand(Integer.toString(cpt));
 			bouton.addActionListener(this);
 			panel.add(bouton);
+			liste_cpt.add(Integer.toString(cpt));
+			cpt++;
 			liste_shapefile.add(nomfichier);
 			liste_nomfichier.add(fichier);
 			liste_bouton.add(bouton);
@@ -90,15 +100,15 @@ public class Controleur implements ActionListener{
 	public void supprimeShapeFile(ActionEvent e){
 		if(liste_shapefile.size()!=0){
 			int index=0;
-			while(!liste_shapefile.get(index).getName().equals(e.getActionCommand())){
+			while(!liste_cpt.get(index).equals(e.getActionCommand())){
 				index++;
 			}
-			System.out.println(index);
 			liste_shapefile.remove(index);
 			panel.remove(liste_bouton.get(index));
 			panel.remove(liste_nomfichier.get(index));
 			liste_nomfichier.remove(index);
 			liste_bouton.remove(index);
+			liste_cpt.remove(index);
 		}
 	}
 }

@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public class GeometryToTriangle {
 	
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
+	private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
 	
 	public GeometryToTriangle(ArrayList<Triangle> liste_triangle ){
 		this.liste_triangle=liste_triangle;
@@ -17,16 +18,17 @@ public class GeometryToTriangle {
 
 
 	//Divise le multipolygon en polygon
-	public void decomposeMultiPolygon(MultiPolygon mp){
+	public ArrayList<Polygon> decomposeMultiPolygon(MultiPolygon mp){
 		Polygon polys;
 		for (int i = 0; i < mp.getNumGeometries(); i++) {
 			polys = ((Polygon)mp.getGeometryN(i));
-			polygonSTL(polys);
+			liste_polygon.add(polys);
 		}
+		return liste_polygon;
 	}
 
 	
-	//Recupere tous les triangles du polygon et les convertie en Triangle
+	//Recupere tous les triangles qui composent le polygon et les convertie en Triangle
 	public void polygonSTL(Polygon polys){
 		epaisseurTriangle(polys);
 		ArrayList<Polygon> triangles = trianglePolygon(polys);
