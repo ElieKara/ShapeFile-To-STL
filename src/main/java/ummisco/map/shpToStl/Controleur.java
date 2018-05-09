@@ -2,6 +2,8 @@ package ummisco.map.shpToStl;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -14,7 +16,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Controleur implements ActionListener{
 
-	private ArrayList<String> liste_shapefile = new ArrayList<String>();
+	private ArrayList<File> liste_shapefile = new ArrayList<File>();
 	private ArrayList<JButton> liste_bouton = new ArrayList<JButton>();
 	private ArrayList<JLabel> liste_nomfichier = new ArrayList<JLabel>();
 	private JFrame fenetre;
@@ -37,6 +39,11 @@ public class Controleur implements ActionListener{
 		}
 		else if(text.equals("Convertir en STL")){
 			Conversion conv = new Conversion(liste_shapefile);
+			try {
+				conv.parcoursFichier();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			for(int i=0;i<liste_shapefile.size();i++){
 				liste_shapefile.remove(0);
 				liste_nomfichier.remove(0);
@@ -58,12 +65,12 @@ public class Controleur implements ActionListener{
 		exploreur.setFileFilter(shp);
 		int res = exploreur.showOpenDialog(fenetre);
 		if(res==JFileChooser.APPROVE_OPTION){
-			String nomfichier = exploreur.getSelectedFile().getName();
-			JLabel fichier = new JLabel(nomfichier);
+			File nomfichier = exploreur.getSelectedFile();
+			JLabel fichier = new JLabel(nomfichier.getName());
 			fichier.setHorizontalAlignment(SwingConstants.CENTER);
 			panel.add(fichier);
 			JButton bouton = new JButton("Supprimer");
-			bouton.setActionCommand(nomfichier);
+			bouton.setActionCommand(nomfichier.getName());
 			bouton.addActionListener(this);
 			panel.add(bouton);
 			liste_shapefile.add(nomfichier);
@@ -74,7 +81,7 @@ public class Controleur implements ActionListener{
 
 
 	//Renvoit la liste des noms des fichier shapefile
-	public ArrayList<String> getListeShapeFile(){
+	public ArrayList<File> getListeShapeFile(){
 		return liste_shapefile;
 	}
 
@@ -82,7 +89,11 @@ public class Controleur implements ActionListener{
 	//Supprime ShapeFile
 	public void supprimeShapeFile(ActionEvent e){
 		if(liste_shapefile.size()!=0){
-			int index = liste_shapefile.indexOf(e.getActionCommand());
+			int index=0;
+			while(!liste_shapefile.get(index).getName().equals(e.getActionCommand())){
+				index++;
+			}
+			System.out.println(index);
 			liste_shapefile.remove(index);
 			panel.remove(liste_bouton.get(index));
 			panel.remove(liste_nomfichier.get(index));

@@ -20,7 +20,7 @@ public class Interface{
 	private JLabel label;
 	private JButton choix;
 	private JButton convertir;
-	private Color couleurLabel;
+	private Color couleur;
 	private JScrollPane scroll;
 	private Controleur controleur;
 	
@@ -29,7 +29,7 @@ public class Interface{
 		this.choix = new JButton("Nouveau ShapeFile");
 		this.convertir = new JButton("Convertir en STL");
 		this.panel = new JPanel();
-		this.couleurLabel = new Color(250,250,250);
+		this.couleur = new Color(250,250,250);
 		this.label = new JLabel("ShapeFile to STL");
 		this.panel2 = new JPanel(new GridLayout(0,2));
 		this.scroll = new JScrollPane(panel2);
@@ -47,15 +47,15 @@ public class Interface{
 		label.setFont(new Font("Arial",Font.BOLD,50));
 		label.setHorizontalAlignment(JLabel.CENTER);
 		label.setForeground(new Color(Integer.parseInt("#302CB8".replaceFirst("#",""),16)));
-		label.setBackground(couleurLabel);
+		label.setBackground(couleur);
 		label.setOpaque(true);
-		panel2.setBackground(couleurLabel);
+		panel2.setBackground(couleur);
 		Controleur controleur = new Controleur(fenetre,panel2);
 		choix.addActionListener(controleur);
 		convertir.addActionListener(controleur);
 		panel.add(choix);
 		panel.add(convertir);
-		panel.setBackground(couleurLabel);
+		panel.setBackground(couleur);
 		fenetre.add(label,BorderLayout.NORTH);
 		fenetre.add(scroll,BorderLayout.CENTER);
 		fenetre.add(panel,BorderLayout.SOUTH);

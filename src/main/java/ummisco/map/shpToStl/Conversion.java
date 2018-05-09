@@ -1,5 +1,8 @@
 package ummisco.map.shpToStl;
 
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.opengis.feature.simple.SimpleFeature;
@@ -8,11 +11,11 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class Conversion {
 
-	private ArrayList<String> liste_shapefile;
+	private ArrayList<File> liste_shapefile;
 	private GeometryToTriangle gtt;
 	private ArrayList<Triangle> liste_triangle;
 
-	public Conversion(ArrayList<String> liste_shapefile){
+	public Conversion(ArrayList<File> liste_shapefile){
 		this.liste_shapefile=liste_shapefile;
 		this.liste_triangle = new ArrayList<Triangle>();
 		gtt = new GeometryToTriangle(liste_triangle);
@@ -21,14 +24,15 @@ public class Conversion {
 	
 	public void parcoursFichier() throws IOException{
 		for(int i=0;i<liste_shapefile.size();i++){
-
+			
+			System.out.println("aa");
 			//Recuperation des donnees du fichier shp
 			ShpFile file = new ShpFile(liste_shapefile.get(i));
 			ArrayList<SimpleFeature> features = file.readFile();
 
 			//Parcours toutes la structure
 			for(SimpleFeature feature:features){
-
+				System.out.println(feature.getAttributes());
 				//Verification de forme geometrique
 				String s = feature.getAttribute("the_geom").toString();
 				//if(s.indexOf("GEOMETRYCOLLECTION")!=-1){}
@@ -49,6 +53,16 @@ public class Conversion {
 				}
 			}
 		}
+		
+		//Cree fichier STL
+		FileOutputStream fos = new FileOutputStream("zimbabwe.stl");
+		DataOutputStream dos = new DataOutputStream(fos);
+		
+		//Ecrit le fichier STL
+		WriteSTL stl = new WriteSTL(liste_triangle,dos);
+		stl.ecrireCommentaire();
+		stl.ecrireNbTriangle();
+		stl.ecrireTriangles();
 	}
 }
 
