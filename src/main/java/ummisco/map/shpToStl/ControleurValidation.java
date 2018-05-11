@@ -17,14 +17,16 @@ public class ControleurValidation implements ActionListener{
 	private ArrayList<File> liste_shapefile = new ArrayList<File>();
 	private JFrame fenetre;
 	private JFrame fenetredebut;
-	private JFormattedTextField decoupe;
+	private JFormattedTextField decoupex;
+	private JFormattedTextField decoupey;
 	private JTextField hauteur;
 
-	public ControleurValidation(JFrame fenetredebut,JFrame fenetre,JFormattedTextField decoupe,JTextField hauteur,ArrayList<File> liste_shapefile ){
+	public ControleurValidation(JFrame fenetredebut,JFrame fenetre,JFormattedTextField decoupex,JFormattedTextField decoupey,JTextField hauteur,ArrayList<File> liste_shapefile ){
 		this.fenetre=fenetre;
 		this.fenetredebut=fenetredebut;
 		this.liste_shapefile=liste_shapefile;
-		this.decoupe=decoupe;
+		this.decoupex=decoupex;
+		this.decoupey=decoupey;
 		this.hauteur=hauteur;
 		
 	}
@@ -39,20 +41,21 @@ public class ControleurValidation implements ActionListener{
 			fenetre.setVisible(false);
 		}
 		if(text.equals("OK")){
-			int coupe;
+			int coupex,coupey;
 			String haut;
-			if(decoupe.getText().equals(""))
-				coupe=1;
+			if(decoupex.getText().equals(""))
+				coupex=0;
 			else
-				coupe = Integer.parseInt(decoupe.getText());
-			if(coupe==0)
-				coupe=1;
+				coupex = Integer.parseInt(decoupex.getText());
+			if(decoupey.getText().equals(""))
+				coupey=0;
+			else
+				coupey = Integer.parseInt(decoupey.getText());
 			if(hauteur.getText().equals(""))
 				haut="Valeur par defout ?";
 			else
 				haut = hauteur.getText();
-			System.out.println(coupe+" - "+haut);
-			Conversion conv = new Conversion(liste_shapefile,coupe,haut);	
+			Conversion conv = new Conversion(liste_shapefile,coupex,coupey,haut);	
 			try {
 				conv.parcoursFichier();
 			} catch (IOException e1) {

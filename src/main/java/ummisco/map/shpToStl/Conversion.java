@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -17,18 +19,21 @@ public class Conversion {
 	private GeometryToTriangle gtt;
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 	private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
-	private int decoupe;
+	private int decoupex;
+	private int decoupey;
 	private String hauteur;
 
-	public Conversion(ArrayList<File> liste_shapefile,int decoupe, String hauteur){
+	public Conversion(ArrayList<File> liste_shapefile,int decoupex,int decoupey, String hauteur){
 		this.liste_shapefile=liste_shapefile;
-		this.decoupe=decoupe;
+		this.decoupex=decoupex;
+		this.decoupey=decoupey;
 		this.hauteur=hauteur;
 		this.liste_triangle = new ArrayList<Triangle>();
 		gtt = new GeometryToTriangle(liste_triangle);
 	}
 
 
+	//Parcours les fichiers shapefiles et regroupe dans les Geometry en un
 	public void parcoursFichier() throws IOException{
 		for(int i=0;i<liste_shapefile.size();i++){
 
@@ -65,10 +70,39 @@ public class Conversion {
 		}
 		GeometryFactory factory = new GeometryFactory();
 		MultiPolygon total = factory.createMultiPolygon(tab_polys);
-		System.out.println(total);
 		Geometry geo = (Geometry) total;
+		
+		//Geometry test2 = test.intersection(geo);
+		ArrayList<Geometry> liste = quadrillage(geo);
 	}
 
+	
+	//Retourne le quadrillage de la Geometry
+	public ArrayList<Geometry> quadrillage(Geometry geo){
+		ArrayList<Geometry> quadri = new ArrayList<Geometry>();
+		GeometryFactory fact = new GeometryFactory();
+		Geometry limite = geo.getEnvelope();
+		Coordinate[] coord = limite.getCoordinates();
+		double intervalx = (coord[0].x+coord[2].x)/(double)decoupex;
+		double intervaly = (coord[0].y+coord[2].y)/(double)decoupey;
+		intervalx=Math.sqrt(Math.pow(intervalx-coord[0].x,2));
+		intervaly=Math.sqrt(Math.pow(intervaly-coord[0].y,2));
+		for(int i=0;i<decoupex+1;i++){
+			System.out.println(i+" ------");
+			for(int j=0;j<decoupey+1;j++){
+				Coordinate coord1 = new Coordinate(coord[0].x+intervalx*i,coord[0].y+intervaly*j);
+				Coordinate coord2 = new Coordinate(coord[0].x+intervalx*(i+1),coord[0].y+intervaly*j);
+				Coordinate coord3 = new Coordinate(coord[0].x+intervalx*(i+1),coord[0].y+intervaly*(j+1));
+				Coordinate coord4 = new Coordinate(coord[0].x+intervalx*i,coord[0].y+intervaly*(j+1));
+				Coordinate[] cooord = {coord1,coord2,coord3,coord4,coord1};
+				Polygon polys = fact.createPolygon(cooord);
+				quadri.add((Geometry)polys);
+			}
+			System.out.println(" ------");
+		}
+		return quadri;
+	}
+	
 
 	//Ecritur du fichier STL
 	public void ecrireSTL() throws IOException{
