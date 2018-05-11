@@ -3,30 +3,65 @@ package ummisco.map.shpToStl;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.JButton;
+
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+
 
 public class ControleurValidation implements ActionListener{
+	
 	private ArrayList<File> liste_shapefile = new ArrayList<File>();
-	private ArrayList<JButton> liste_bouton = new ArrayList<JButton>();
-	private ArrayList<JLabel> liste_nomfichier = new ArrayList<JLabel>();
-	private ArrayList<String> liste_cpt = new ArrayList<String>();
 	private JFrame fenetre;
-	private JPanel panel;
+	private JFrame fenetredebut;
+	private JFormattedTextField decoupe;
+	private JTextField hauteur;
 
-	public ControleurValidation(JFrame fenetre, JPanel panel){
+	public ControleurValidation(JFrame fenetredebut,JFrame fenetre,JFormattedTextField decoupe,JTextField hauteur,ArrayList<File> liste_shapefile ){
 		this.fenetre=fenetre;
-		this.panel=panel;
+		this.fenetredebut=fenetredebut;
+		this.liste_shapefile=liste_shapefile;
+		this.decoupe=decoupe;
+		this.hauteur=hauteur;
+		
 	}
 
+	
+	//Verifit le bouton clique
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
-		
+		String text = e.getActionCommand();
+		if(text.equals("Retour")){
+			fenetredebut.setVisible(true);
+			fenetre.setVisible(false);
+		}
+		if(text.equals("OK")){
+			int coupe;
+			String haut;
+			if(decoupe.getText().equals(""))
+				coupe=1;
+			else
+				coupe = Integer.parseInt(decoupe.getText());
+			if(coupe==0)
+				coupe=1;
+			if(hauteur.getText().equals(""))
+				haut="Valeur par defout ?";
+			else
+				haut = hauteur.getText();
+			System.out.println(coupe+" - "+haut);
+			Conversion conv = new Conversion(liste_shapefile,coupe,haut);	
+			try {
+				conv.parcoursFichier();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			JOptionPane.showMessageDialog(fenetre,"Termine !","", JOptionPane.INFORMATION_MESSAGE);
+			fenetre.dispose();
+			fenetredebut.dispose();
+			Interface fenetre = new Interface();
+		}
 	}
 }

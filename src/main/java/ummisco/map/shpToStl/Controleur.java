@@ -3,7 +3,6 @@ package ummisco.map.shpToStl;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -42,21 +41,8 @@ public class Controleur implements ActionListener{
 		}
 		else if(text.equals("Suivant")){
 			if(liste_shapefile.size()!=0){
-				//Conversion conv = new Conversion(liste_shapefile);	
-				/*try {
-					conv.parcoursFichier();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}*/
 				fenetre.setVisible(false);
 				InterfaceValidation interval = new InterfaceValidation(liste_shapefile,fenetre);
-				for(int i=0;i<liste_shapefile.size();i++){
-					liste_shapefile.remove(0);
-					liste_nomfichier.remove(0);
-					liste_bouton.remove(0);
-					liste_cpt.remove(0);
-				}
-				panel.removeAll();
 			}
 		}
 		else{
@@ -87,12 +73,6 @@ public class Controleur implements ActionListener{
 			liste_nomfichier.add(fichier);
 			liste_bouton.add(bouton);
 		}
-	}
-
-
-	//Renvoit la liste des noms des fichier shapefile
-	public ArrayList<File> getListeShapeFile(){
-		return liste_shapefile;
 	}
 
 

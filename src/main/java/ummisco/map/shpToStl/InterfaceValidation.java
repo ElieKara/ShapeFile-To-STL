@@ -5,49 +5,46 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
-
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 
 public class InterfaceValidation {
 
 	private JFrame fenetre;
-	private JFrame fenetre2;
 	private JPanel panel;
 	private JPanel panel2;
 	private JLabel label;
 	private JLabel label2;
 	private JLabel label3;
-	private JTextField decoupe;
+	private JFormattedTextField decoupe;
 	private JTextField hauteur;
 	private JButton retour;
 	private JButton ok;
 	private Color couleur;
+	private NumberFormat contrainte;
 	private ControleurValidation controleur;
-	private ArrayList<File> liste_shapefile = new ArrayList<File>();
 	
 	public InterfaceValidation( ArrayList<File> liste_shapefile, JFrame fenetre2){
-		this.liste_shapefile = liste_shapefile;
-		this.fenetre2 = fenetre2;
-		
 		this.fenetre = new JFrame("ShapeSTL");
 		this.retour = new JButton("Retour");
 		this.ok = new JButton("OK");
 		this.panel = new JPanel();
 		this.couleur = new Color(250,250,250);
 		this.label = new JLabel("ShapeFile to STL");
-		this.label2 = new JLabel("Decoupage en : ");
+		this.label2 = new JLabel("Decoupage (entier naturel) : ");
 		this.label3 = new JLabel("Variable hauteur : ");
 		this.panel2 = new JPanel(new GridLayout(0,2));
-		this.controleur = new ControleurValidation(fenetre,panel2);
-		this.decoupe = new JTextField();
+		this.contrainte = NumberFormat.getIntegerInstance();
+		this.contrainte.setMaximumFractionDigits(0);
+		this.decoupe = new JFormattedTextField(contrainte);
 		this.hauteur = new JTextField();
+		this.controleur = new ControleurValidation(fenetre2,fenetre,decoupe,hauteur,liste_shapefile);
 		this.fenetreApp();
 	}
 
@@ -62,8 +59,7 @@ public class InterfaceValidation {
 		label.setHorizontalAlignment(JLabel.CENTER);
 		label.setForeground(new Color(Integer.parseInt("#302CB8".replaceFirst("#",""),16)));
 		label.setBackground(couleur);
-		label.setOpaque(true);
-		
+		label.setOpaque(true);	
 		label2.setHorizontalAlignment(JLabel.CENTER);
 		label3.setHorizontalAlignment(JLabel.CENTER);
 		panel2.setBackground(couleur);
@@ -71,13 +67,11 @@ public class InterfaceValidation {
 		panel2.add(decoupe);
 		panel2.add(label3);
 		panel2.add(hauteur);
-		
-		//retour.addActionListener(controleur);
-		//ok.addActionListener(controleur);
+		retour.addActionListener(controleur);
+		ok.addActionListener(controleur);
 		panel.add(retour);
 		panel.add(ok);
 		panel.setBackground(couleur);
-		
 		fenetre.add(label,BorderLayout.NORTH);
 		fenetre.add(panel2,BorderLayout.CENTER);
 		fenetre.add(panel,BorderLayout.SOUTH);

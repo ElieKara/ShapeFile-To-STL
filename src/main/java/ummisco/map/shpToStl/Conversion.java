@@ -2,12 +2,10 @@ package ummisco.map.shpToStl;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.opengis.feature.simple.SimpleFeature;
-
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -19,9 +17,13 @@ public class Conversion {
 	private GeometryToTriangle gtt;
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 	private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
+	private int decoupe;
+	private String hauteur;
 
-	public Conversion(ArrayList<File> liste_shapefile){
+	public Conversion(ArrayList<File> liste_shapefile,int decoupe, String hauteur){
 		this.liste_shapefile=liste_shapefile;
+		this.decoupe=decoupe;
+		this.hauteur=hauteur;
 		this.liste_triangle = new ArrayList<Triangle>();
 		gtt = new GeometryToTriangle(liste_triangle);
 	}
