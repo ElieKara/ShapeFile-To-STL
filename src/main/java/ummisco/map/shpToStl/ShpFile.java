@@ -14,15 +14,19 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 
-public class ShpFile extends File {
+public class ShpFile{
 	
-	public ShpFile(String fileName){
-		super(fileName);		
+	private File fileName;
+	
+	public ShpFile(File fileName){
+		this.fileName=fileName;	
 	}
 	
+	
+	//Ouverture du fichier ShapeFile
 	public ArrayList<SimpleFeature> readFile() throws IOException{
 		Map<String, Object> map = new HashMap<>();
-		map.put("url", this.toURI().toURL());
+		map.put("url", fileName.toURI().toURL());
 		DataStore dataStore = DataStoreFinder.getDataStore(map);
 		String typeName = dataStore.getTypeNames()[0];
 		FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource(typeName);

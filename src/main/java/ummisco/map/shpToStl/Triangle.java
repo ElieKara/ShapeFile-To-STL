@@ -1,12 +1,20 @@
 package ummisco.map.shpToStl;
 
 public class Triangle {
+	
 	Point3D[] points;
 	
 	public Triangle(Point3D[] point) {
 		this.points = point;
 	}
 
+
+	//Retourne un tableau de Point3D qui sont les coordonnees du troangle
+	public Point3D[] getPoint3D(){
+		return points;
+	}
+	
+	/*
 	Byte[] toSTL(){
 		Byte[] res = new Byte[50];
 		for(int i =0; res.length>i; i++)
@@ -34,11 +42,6 @@ public class Triangle {
 		data[myIndex+10] = (byte)((int)(p.getZ()) >> 8 & 0xFF);
 		data[myIndex+11] = (byte)((int)(p.getZ()) >> 16 & 0xFF);
 		data[myIndex+12] = (byte)((int)(p.getZ()) >> 24 & 0xFF);
-	}
-	
-	public Point3D[] getPoint3D(){
-		return points;
-	}
-	
+	}*/
 	
 }
