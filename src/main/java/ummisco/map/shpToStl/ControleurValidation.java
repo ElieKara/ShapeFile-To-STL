@@ -52,7 +52,7 @@ public class ControleurValidation implements ActionListener{
 			else
 				coupey = Integer.parseInt(decoupey.getText());
 			if(hauteur.getText().equals(""))
-				haut="Valeur par defout ?";
+				haut="Error";
 			else
 				haut = hauteur.getText();
 			Conversion conv = new Conversion(liste_shapefile,coupex,coupey,haut);	

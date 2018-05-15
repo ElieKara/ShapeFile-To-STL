@@ -18,6 +18,7 @@ public class Conversion {
 	private GeometryToTriangle gtt;
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 	private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
+	private ArrayList<Double> liste_hauteur= new ArrayList<Double>();
 	private int decoupex;
 	private int decoupey;
 	private String hauteur;
@@ -42,23 +43,18 @@ public class Conversion {
 
 			//Parcours toutes la structure
 			for(SimpleFeature feature:features){
+				
 				//Verification de forme geometrique
-				String s = feature.getAttribute("the_geom").toString();
-				//if(s.indexOf("GEOMETRYCOLLECTION")!=-1){}
-				if(s.indexOf("POINT ZM")!=-1){}
-				else if(s.indexOf("POINT M")!=-1){
-				}else if(s.indexOf("POINT EMPTY")!=-1){
-				}else if(s.indexOf("MULTIPOINT")!=-1){
-				}else if(s.indexOf("POINT")!=-1){
-				}else if(s.indexOf("MULTILINESTRING")!=-1){
-				}else if(s.indexOf("LINESTRING")!=-1){
-				}else if(s.indexOf("MULTIPOLYGON EMPTY")!=-1){
-				}else if(s.indexOf("MULTIPOLYGON")!=-1){
-					MultiPolygon mp = (MultiPolygon) feature.getAttribute("the_geom");
-					liste_polygon=gtt.decomposeMultiPolygon(mp);
-				}else if(s.indexOf("POLYGON")!=-1){
-					Polygon polys = (Polygon) feature.getAttribute("the_geom");
+				Geometry geom = (Geometry) feature.getAttribute("the_geom");
+				if(geom instanceof Polygon){
+					Polygon polys = (Polygon) geom;
 					liste_polygon.add(polys);
+					if(!hauteur.equals("Error"));
+						liste_hauteur.add((Double) feature.getAttribute(hauteur));
+				}
+				if(geom instanceof MultiPolygon){
+					MultiPolygon mp = (MultiPolygon) geom;
+					liste_polygon=gtt.decomposeMultiPolygon(mp);
 				}
 			}
 		}
@@ -146,6 +142,13 @@ public class Conversion {
 		stl.ecrireTriangles();
 		dos.close();
 		fos.close();
+	}
+	
+	
+	//Parcours tous les polygons pour retrouver la hauteur du polygon donne
+	public double hauteurPolygon(Geometry geo){
+		
+		return 2;
 	}
 }
 
