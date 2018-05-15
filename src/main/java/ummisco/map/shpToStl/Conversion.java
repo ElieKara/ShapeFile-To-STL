@@ -44,22 +44,33 @@ public class Conversion {
 			//Parcours toutes la structure
 			for(SimpleFeature feature:features){
 				
-				//Verification de forme geometrique
+				//Verification de forme geometrique, recuperation des polygons + leur hauteur
 				Geometry geom = (Geometry) feature.getAttribute("the_geom");
 				if(geom instanceof Polygon){
 					Polygon polys = (Polygon) geom;
 					liste_polygon.add(polys);
-					if(!hauteur.equals("Error"));
+					if(!hauteur.equals("Error"))
 						liste_hauteur.add((Double) feature.getAttribute(hauteur));
 				}
 				if(geom instanceof MultiPolygon){
 					MultiPolygon mp = (MultiPolygon) geom;
-					liste_polygon=gtt.decomposeMultiPolygon(mp);
+					liste_polygon=gtt.decomposeMultiPolygon(mp,liste_polygon);
+					if(!hauteur.equals("Error")){
+						int cpt = liste_polygon.size()-liste_hauteur.size();
+						for(int l=0;l<cpt;l++){
+							liste_hauteur.add((Double) feature.getAttribute(hauteur));
+						}
+					}
 				}
 			}
 		}
+		regroupePolygon();
+	}
+	
 		
-		//Regroupe tous les polygons dans un MultiPolygon puis le met en Geometry
+	//Regroupe tous les polygons dans un MultiPolygon puis le met en Geometry
+	public void regroupePolygon() throws IOException{
+		double haut=0;
 		Polygon[] tab_polys = new Polygon[liste_polygon.size()];
 		for(int i=0;i<liste_polygon.size();i++){
 			tab_polys[i]=liste_polygon.get(i);
@@ -76,13 +87,16 @@ public class Conversion {
 			Geometry res = geo.intersection(liste.get(i));
 			if(res instanceof Polygon){
 				Polygon respoly = (Polygon) res;
-				gtt.polygonSTL(respoly);
+				//haut = hauteurPolygon(respoly);
+				gtt.polygonSTL(respoly,haut);
 			}
 			else if(res instanceof MultiPolygon){
 				MultiPolygon resmul = (MultiPolygon) res;
-				ArrayList<Polygon> listepolys = gtt.decomposeMultiPolygonQuadra(resmul);
+				ArrayList<Polygon> listepolys = new ArrayList<Polygon>();
+				listepolys = gtt.decomposeMultiPolygon(resmul,listepolys);
 				for(int j=0;j<listepolys.size();j++){
-					gtt.polygonSTL(listepolys.get(j));
+					//haut = hauteurPolygon(listepolys.get(j));
+					gtt.polygonSTL(listepolys.get(j),haut);
 				}
 			}
 			else
@@ -92,7 +106,6 @@ public class Conversion {
 			//Ecrit fichier STL 
 			ecrireSTL(i);
 			gtt.videListe();
-			
 		}
 	}
 
@@ -146,9 +159,12 @@ public class Conversion {
 	
 	
 	//Parcours tous les polygons pour retrouver la hauteur du polygon donne
-	public double hauteurPolygon(Geometry geo){
-		
-		return 2;
+	public double hauteurPolygon(Polygon polys){
+			for(int i=0;i<liste_polygon.size();i++){
+				if(liste_polygon.get(i).contains(polys))
+					return liste_hauteur.get(i);
+			}
+		return 0;
 	}
 }
 

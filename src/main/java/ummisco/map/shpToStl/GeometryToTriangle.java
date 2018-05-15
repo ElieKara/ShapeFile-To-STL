@@ -10,13 +10,12 @@ import com.vividsolutions.jts.geom.Polygon;
 public class GeometryToTriangle {
 	
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
-	private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
 	
 	public GeometryToTriangle(){}
 
 
 	//Divise le multipolygon en polygon
-	public ArrayList<Polygon> decomposeMultiPolygon(MultiPolygon mp){
+	public ArrayList<Polygon> decomposeMultiPolygon(MultiPolygon mp,ArrayList<Polygon> liste_polygon){
 		Polygon polys;
 		for (int i = 0; i < mp.getNumGeometries(); i++) {
 			polys = ((Polygon)mp.getGeometryN(i));
@@ -24,23 +23,11 @@ public class GeometryToTriangle {
 		}
 		return liste_polygon;
 	}
-	
-
-	//Divise le multipolygon en polygon (quadrillage)
-		public ArrayList<Polygon> decomposeMultiPolygonQuadra(MultiPolygon mp){
-			Polygon polys;
-			ArrayList<Polygon> liste_polygonqua = new ArrayList<Polygon>();
-			for (int i = 0; i < mp.getNumGeometries(); i++) {
-				polys = ((Polygon)mp.getGeometryN(i));
-				liste_polygonqua.add(polys);
-			}
-			return liste_polygonqua;
-		}
 
 	
 	//Recupere tous les triangles qui composent le polygon et les convertie en Triangle
-	public void polygonSTL(Polygon polys){
-		//epaisseurTriangle(polys);
+	public void polygonSTL(Polygon polys,double hauteur){
+		//epaisseurTriangle(polys,hauteur);
 		ArrayList<Polygon> triangles = new ArrayList<Polygon>();
 		triangles = trianglePolygon(polys,triangles);
 		for(Polygon p:triangles){
@@ -49,7 +36,7 @@ public class GeometryToTriangle {
 			Coordinate[] coord_triangle=p.getCoordinates();
 			for(int i=0;i<3;i++){
 				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
-				//point2[i] = new Point3D((float) coord_triangle[i].x,1.0f,(float) coord_triangle[i].y);
+				//point2[i] = new Point3D((float) coord_triangle[i].x,(float)hateur,(float) coord_triangle[i].y);
 			}
 			Triangle tri = new Triangle(point);
 			//Triangle tri2 = new Triangle(point2);
@@ -60,15 +47,15 @@ public class GeometryToTriangle {
 	
 	
 	//Construit les triangles pour l'épaisseur
-	public void epaisseurTriangle(Polygon polys){
+	public void epaisseurTriangle(Polygon polys, double hauteur){
 		for(int i=0;i<polys.getNumPoints()-1;i++){
 			Point3D[] point = new Point3D[3];
 			Point3D[] point2 = new Point3D[3];
 			Coordinate[] coord_polys=polys.getCoordinates();
 			point[0]= new Point3D ((float) coord_polys[i].x,0.0f,(float) coord_polys[i].y);
-			point2[0]= new Point3D ((float) coord_polys[i].x,1.0f,(float) coord_polys[i].y);
+			point2[0]= new Point3D ((float) coord_polys[i].x,(float)hauteur,(float) coord_polys[i].y);
 			point[1]= new Point3D ((float) coord_polys[i+1].x,0.0f,(float) coord_polys[i+1].y);
-			point2[1]= new Point3D ((float) coord_polys[i+1].x,1.0f,(float) coord_polys[i+1].y);
+			point2[1]= new Point3D ((float) coord_polys[i+1].x,(float)hauteur,(float) coord_polys[i+1].y);
 			point[2]= point2[1];
 			point2[2]= point[0];
 			Triangle tri = new Triangle(point);
