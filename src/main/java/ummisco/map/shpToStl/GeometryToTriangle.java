@@ -26,6 +26,7 @@ public class GeometryToTriangle {
 	}
 	
 	
+	
 	//Divise le multipolygon en polygon (quadrillage)
 		public ArrayList<Polygon> decomposeMultiPolygonQuadra(MultiPolygon mp){
 			Polygon polys;
