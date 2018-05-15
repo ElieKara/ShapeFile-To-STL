@@ -12,9 +12,7 @@ public class GeometryToTriangle {
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
 	private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
 	
-	public GeometryToTriangle(ArrayList<Triangle> liste_triangle ){
-		this.liste_triangle=liste_triangle;
-	}
+	public GeometryToTriangle(){}
 
 
 	//Divise le multipolygon en polygon
@@ -26,24 +24,37 @@ public class GeometryToTriangle {
 		}
 		return liste_polygon;
 	}
+	
+	
+	//Divise le multipolygon en polygon (quadrillage)
+		public ArrayList<Polygon> decomposeMultiPolygonQuadra(MultiPolygon mp){
+			Polygon polys;
+			ArrayList<Polygon> liste_polygonqua = new ArrayList<Polygon>();
+			for (int i = 0; i < mp.getNumGeometries(); i++) {
+				polys = ((Polygon)mp.getGeometryN(i));
+				liste_polygonqua.add(polys);
+			}
+			return liste_polygonqua;
+		}
 
 	
 	//Recupere tous les triangles qui composent le polygon et les convertie en Triangle
 	public void polygonSTL(Polygon polys){
-		epaisseurTriangle(polys);
-		ArrayList<Polygon> triangles = trianglePolygon(polys);
+		//epaisseurTriangle(polys);
+		ArrayList<Polygon> triangles = new ArrayList<Polygon>();
+		triangles = trianglePolygon(polys,triangles);
 		for(Polygon p:triangles){
 			Point3D[] point = new Point3D[3];
-			Point3D[] point2 = new Point3D[3];
+			//Point3D[] point2 = new Point3D[3];
 			Coordinate[] coord_triangle=p.getCoordinates();
 			for(int i=0;i<3;i++){
 				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
-				point2[i] = new Point3D((float) coord_triangle[i].x,1.0f,(float) coord_triangle[i].y);
+				//point2[i] = new Point3D((float) coord_triangle[i].x,1.0f,(float) coord_triangle[i].y);
 			}
 			Triangle tri = new Triangle(point);
-			Triangle tri2 = new Triangle(point2);
+			//Triangle tri2 = new Triangle(point2);
 			liste_triangle.add(tri);
-			liste_triangle.add(tri2);
+			//liste_triangle.add(tri2);
 		}
 	}
 	
@@ -65,19 +76,18 @@ public class GeometryToTriangle {
 			liste_triangle.add(tri);
 			liste_triangle.add(tri2);
 		}
-			
 	}
 	
 	
-	//Recupere tous les triangles de la geometrie
+	/*//Recupere tous les triangles de la geometrie
 	public ArrayList<Polygon> trianglePolygon(Polygon polys){
 		ArrayList<Polygon> allTriangle = new ArrayList<Polygon>();
 		return trianglePolygon(polys,allTriangle);
-	}	
+	}*/	
 	
 	
 	//Trouve une oreille la stock dans liste des triangles et la soustrait au polygone du debut
-	private ArrayList<Polygon> trianglePolygon(Polygon polys,ArrayList<Polygon> allTriangle ){
+	private ArrayList<Polygon> trianglePolygon(Polygon polys,ArrayList<Polygon> allTriangle){
 		int longueur = polys.getNumPoints();
 		if(longueur == 4 ){
 			allTriangle.add(polys);
@@ -113,5 +123,17 @@ public class GeometryToTriangle {
 		Coordinate[] coords = {a,b,c,a};
 		Polygon newpolys =fact.createPolygon(coords);
 		return newpolys;
-	}	
+	}
+	
+	
+	//Vide la liste des triangles
+	public void videListe(){
+		liste_triangle.clear();
+	}
+	
+	
+	//Renvoie la liste des triangles
+	public ArrayList<Triangle> getListeTriangle(){
+		return liste_triangle;
+	}
 }

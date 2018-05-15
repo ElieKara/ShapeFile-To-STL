@@ -32,13 +32,6 @@ public class WriteSTL {
 	//Ecrit les triangles dans le fichier STL
 	public void ecrireTriangles() throws IOException{
 		Point3D[] point;
-		/*Byte[] triangle;
-		for(int i=0;i<tri.size();i++){
-			triangle=tri.get(i).toSTL();
-			for(int j=0;j<50;j++){
-				dos.writeByte(triangle[j]);
-			}
-		}*/
 		for(int t=0;t<tri.size();t++){
 			for(int g=0;g<3;g++)
 				writeIntLE(dos,0);
