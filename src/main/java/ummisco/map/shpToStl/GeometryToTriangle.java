@@ -8,9 +8,9 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class GeometryToTriangle {
-	
+
 	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
-	
+
 	public GeometryToTriangle(){}
 
 
@@ -24,28 +24,32 @@ public class GeometryToTriangle {
 		return liste_polygon;
 	}
 
-	
+
 	//Recupere tous les triangles qui composent le polygon et les convertie en Triangle
 	public void polygonSTL(Polygon polys,double hauteur){
-		//epaisseurTriangle(polys,hauteur);
+		epaisseurTriangle(polys,hauteur);
 		ArrayList<Polygon> triangles = new ArrayList<Polygon>();
 		triangles = trianglePolygon(polys,triangles);
 		for(Polygon p:triangles){
 			Point3D[] point = new Point3D[3];
-			//Point3D[] point2 = new Point3D[3];
+			Point3D[] point2 = new Point3D[3];
 			Coordinate[] coord_triangle=p.getCoordinates();
 			for(int i=0;i<3;i++){
 				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
-				//point2[i] = new Point3D((float) coord_triangle[i].x,(float)hateur,(float) coord_triangle[i].y);
+				if(hauteur!=0)
+					point2[i] = new Point3D((float) coord_triangle[i].x,(float)hauteur,(float) coord_triangle[i].y);
 			}
 			Triangle tri = new Triangle(point);
-			//Triangle tri2 = new Triangle(point2);
 			liste_triangle.add(tri);
-			//liste_triangle.add(tri2);
+			if(hauteur!=0){
+				Triangle tri2 = new Triangle(point2);
+				liste_triangle.add(tri2);
+			}
+			
 		}
 	}
-	
-	
+
+
 	//Construit les triangles pour l'épaisseur
 	public void epaisseurTriangle(Polygon polys, double hauteur){
 		for(int i=0;i<polys.getNumPoints()-1;i++){
@@ -64,15 +68,15 @@ public class GeometryToTriangle {
 			liste_triangle.add(tri2);
 		}
 	}
-	
-	
+
+
 	/*//Recupere tous les triangles de la geometrie
 	public ArrayList<Polygon> trianglePolygon(Polygon polys){
 		ArrayList<Polygon> allTriangle = new ArrayList<Polygon>();
 		return trianglePolygon(polys,allTriangle);
 	}*/	
-	
-	
+
+
 	//Trouve une oreille la stock dans liste des triangles et la soustrait au polygone du debut
 	private ArrayList<Polygon> trianglePolygon(Polygon polys,ArrayList<Polygon> allTriangle){
 		int longueur = polys.getNumPoints();
@@ -87,12 +91,12 @@ public class GeometryToTriangle {
 				allTriangle.add(triangle);
 				polys = (Polygon)polys.difference(triangle);
 				return trianglePolygon(polys, allTriangle);
-				}
+			}
 		}
 		return allTriangle;
 	}	
-	
-	
+
+
 	//Verifie si le triangle est une oreille
 	public boolean isHear(Polygon polys,Polygon triangle ){
 		if(!polys.contains(triangle))
@@ -102,8 +106,8 @@ public class GeometryToTriangle {
 			return true;
 		return false;
 	}
-	
-	
+
+
 	//Genere un triangle avec 3 coordonnees
 	public Polygon generateTriangle(Coordinate a, Coordinate b, Coordinate c){
 		GeometryFactory fact = new GeometryFactory();
@@ -111,14 +115,14 @@ public class GeometryToTriangle {
 		Polygon newpolys =fact.createPolygon(coords);
 		return newpolys;
 	}
-	
-	
+
+
 	//Vide la liste des triangles
 	public void videListe(){
 		liste_triangle.clear();
 	}
-	
-	
+
+
 	//Renvoie la liste des triangles
 	public ArrayList<Triangle> getListeTriangle(){
 		return liste_triangle;
