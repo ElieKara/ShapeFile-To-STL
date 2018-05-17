@@ -45,7 +45,6 @@ public class GeometryToTriangle {
 				Triangle tri2 = new Triangle(point2);
 				liste_triangle.add(tri2);
 			}
-			
 		}
 	}
 
