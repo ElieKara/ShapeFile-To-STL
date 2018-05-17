@@ -15,8 +15,9 @@ public class GeometryToTriangle {
 
 
 	//Divise le multipolygon en polygon
-	public ArrayList<Polygon> decomposeMultiPolygon(MultiPolygon mp,ArrayList<Polygon> liste_polygon){
+	public ArrayList<Polygon> decomposeMultiPolygon(MultiPolygon mp){
 		Polygon polys;
+		ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
 		for (int i = 0; i < mp.getNumGeometries(); i++) {
 			polys = ((Polygon)mp.getGeometryN(i));
 			liste_polygon.add(polys);

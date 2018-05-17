@@ -1,22 +1,23 @@
 package ummisco.map.shpToStl;
 
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class WriteSTL {
-	
-	ArrayList<Triangle> tri;
-	DataOutputStream dos;
 
-	public WriteSTL(ArrayList<Triangle> tri, DataOutputStream dos){
-		this.tri=tri;
-		this.dos=dos;
+	public WriteSTL(ArrayList<Triangle> tri, int num) throws IOException{
+		FileOutputStream fos = new FileOutputStream("STL"+num+".stl");
+		DataOutputStream dos = new DataOutputStream(fos);
+		ecrireCommentaire(dos);
+		ecrireNbTriangle(dos,tri.size());
+		ecrireTriangles(dos,tri);
 	}
-
+	
 	
 	//Ecrit le commentaire du fichier STL
-	public void ecrireCommentaire() throws IOException{
+	public void ecrireCommentaire(DataOutputStream dos) throws IOException{
 		for(int i=0;i<20;i++){
 			dos.writeInt(0);
 		}
@@ -24,13 +25,13 @@ public class WriteSTL {
 
 	
 	//Ecrit le nombre de triangle dans le fichier STL
-	public void ecrireNbTriangle() throws IOException{
-		writeIntLE(dos,tri.size());
+	public void ecrireNbTriangle(DataOutputStream dos,int size) throws IOException{
+		writeIntLE(dos,size);
 	}
 
 	
 	//Ecrit les triangles dans le fichier STL
-	public void ecrireTriangles() throws IOException{
+	public void ecrireTriangles(DataOutputStream dos,ArrayList<Triangle> tri) throws IOException{
 		Point3D[] point;
 		for(int t=0;t<tri.size();t++){
 			for(int g=0;g<3;g++)

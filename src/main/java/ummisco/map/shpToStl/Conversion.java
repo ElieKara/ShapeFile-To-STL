@@ -1,12 +1,11 @@
 package ummisco.map.shpToStl;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -19,18 +18,15 @@ import com.vividsolutions.jts.geom.Polygon;
 public class Conversion {
 
 	private ArrayList<File> liste_shapefile = new ArrayList<File>();
-	private ArrayList<Triangle> liste_triangle = new ArrayList<Triangle>();
-	//private ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
 	private Map<Geometry,Double> liste_polygon= new HashMap<Geometry,Double>();
 	private GeometryToTriangle gtt;
-	private int decoupe;
+	private double coupe;
 	private String hauteur;
 
 	public Conversion(ArrayList<File> liste_shapefile,int coupe, String hauteur){
+		this.coupe=coupe*0.01;
 		this.liste_shapefile=liste_shapefile;
-		this.decoupe=coupe;
 		this.hauteur=hauteur;
-		this.liste_triangle = new ArrayList<Triangle>();
 		this.gtt = new GeometryToTriangle();
 	}
 
@@ -52,18 +48,16 @@ public class Conversion {
 				}
 				if(geom instanceof MultiPolygon){
 					MultiPolygon mp = (MultiPolygon) geom;
-					ArrayList<Polygon> listepoly = new ArrayList<Polygon>();
-					listepoly=gtt.decomposeMultiPolygon(mp,listepoly);
+					ArrayList<Polygon> listepoly = gtt.decomposeMultiPolygon(mp);
 					if(!hauteur.equals("Error")){
-					for(Polygon polys:listepoly){
+						for(Polygon polys:listepoly){
 							liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
 						}
 					}
 					else{
 						for(Polygon polys:listepoly){
 							liste_polygon.put(polys,0.0);
-						}
-				
+						}		
 					}
 				}
 			}
@@ -74,65 +68,86 @@ public class Conversion {
 
 	//Regroupe tous les polygons dans un MultiPolygon puis le met en Geometry
 	public void regroupePolygon() throws IOException{
-		double haut=0;
 		Polygon[] tab_polys = new Polygon[liste_polygon.keySet().size()];
 		int ii = 0;
-		for(Geometry p:liste_polygon.keySet())
-		{
+		for(Geometry p:liste_polygon.keySet()){
 			tab_polys[ii] = (Polygon)p;
 			ii++;
 		}
-			
 		GeometryFactory factory = new GeometryFactory();
 		Geometry geo = factory.createMultiPolygon(tab_polys);
-		//Geometry geo = (Geometry) total;
+		decoupeGeometry(geo);
+	}
+	
+
+	//Divise la Geometry avec le quadrillage
+	public void decoupeGeometry(Geometry geo) throws IOException{
+		Map<Geometry, Double> myMap = new HashMap<Geometry,Double>();
 		Geometry limite = geo.getEnvelope();
 		Coordinate[] coord = limite.getCoordinates();
-		ArrayList<Geometry> liste = quadrillage(coord[0],coord[2],decoupe);
+		ArrayList<Geometry> liste = quadrillage(coord[0],coord[2],coord[1],coupe);
+		for(Geometry cell:liste)
+			for(Entry<Geometry, Double> current:this.liste_polygon.entrySet()){
+				Geometry res =cell.intersection(current.getKey());
+				ArrayList<Geometry> tempRes = new ArrayList<Geometry>();
+				if(res != null)
+					if(res instanceof MultiPolygon){
+						MultiPolygon resmul = (MultiPolygon) res;
+						ArrayList<Polygon> listepolys = gtt.decomposeMultiPolygon(resmul);
+						tempRes.addAll(listepolys);
+					}
+					else 
+						tempRes.add(res);
+				for(Geometry g:tempRes)
+					myMap.put(g, current.getValue());		
+			}
+		conversionTriangle(myMap,geo,liste);
+	}
 
-		//Divise la Geometry avec le quadrillage
-		for(int i=0;i<liste.size();i++){
+	
+	//Convertit les polygones en triangle et les ecrit dans un fichier STL
+	public void conversionTriangle(Map<Geometry, Double> decoupe,Geometry geo,ArrayList<Geometry> liste) throws IOException{
+		double haut = 0;
+		for(int i=0;i<liste.size();i++){	
 			Geometry res = geo.intersection(liste.get(i));
-			System.out.println("Geometry "+i );
 			if(res instanceof Polygon){
 				Polygon respoly = (Polygon) res;
-				//haut = hauteurPolygon(respoly);
+				haut= hauteurPolygon(decoupe,respoly);
 				gtt.polygonSTL(respoly,haut);
 			}
 			else if(res instanceof MultiPolygon){
 				MultiPolygon resmul = (MultiPolygon) res;
-				ArrayList<Polygon> listepolys = new ArrayList<Polygon>();
-				listepolys = gtt.decomposeMultiPolygon(resmul,listepolys);
+				ArrayList<Polygon> listepolys = gtt.decomposeMultiPolygon(resmul);
 				for(int j=0;j<listepolys.size();j++){
-					//haut = hauteurPolygon(listepolys.get(j));
+					haut = hauteurPolygon(decoupe,listepolys.get(j));
 					gtt.polygonSTL(listepolys.get(j),haut);
 				}
 			}
-			else
-				System.out.println(res);
-			liste_triangle=gtt.getListeTriangle();
-
-			//Ecrit fichier STL 
-			ecrireSTL(i);
+			WriteSTL write = new WriteSTL(gtt.getListeTriangle(),i);
 			gtt.videListe();
 		}
 	}
-
+		
 
 	//Retourne le quadrillage de la Geometry
-	public ArrayList<Geometry> quadrillage(Coordinate min, Coordinate max, int coupe){
+	public ArrayList<Geometry> quadrillage(Coordinate min, Coordinate max,Coordinate minmax, double coupe){
 		ArrayList<Geometry> quadri = new ArrayList<Geometry>();
-		double intervalx = (max.x - min.x ) / width;
-		double intervaly =(max.y - min.y ) / height;
 		GeometryFactory fact = new GeometryFactory();
-		//Point p;
-		//p.distance(g);
-		for(int i=0;i<width;i++){
-			for(int j=0;j<height;j++){
-				Coordinate coord1 = new Coordinate(min.x+intervalx*i,min.y+intervaly*j);
-				Coordinate coord2 = new Coordinate(min.x+intervalx*(i+1),min.y+intervaly*j);
-				Coordinate coord3 = new Coordinate(min.x+intervalx*(i+1),min.y+intervaly*(j+1));
-				Coordinate coord4 = new Coordinate(min.x+intervalx*i,min.y+intervaly*(j+1));
+		Point minp = fact.createPoint(min);
+		Point maxp = fact.createPoint(max);
+		Point minmaxp = fact.createPoint(minmax);
+		double width = Math.round(((minp.distance(minmaxp))/coupe));
+		double height = Math.round(((maxp.distance(minmaxp))/coupe));
+		if(width*coupe<minp.distance(minmaxp))
+			width++;
+		if(height*coupe<maxp.distance(minmaxp))
+			height++;
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				Coordinate coord1 = new Coordinate(min.x+coupe*i,min.y+coupe*j);
+				Coordinate coord2 = new Coordinate(min.x+coupe*(i+1),min.y+coupe*j);
+				Coordinate coord3 = new Coordinate(min.x+coupe*(i+1),min.y+coupe*(j+1));
+				Coordinate coord4 = new Coordinate(min.x+coupe*i,min.y+coupe*(j+1));
 				Coordinate[] cooord = {coord1,coord2,coord3,coord4,coord1};
 				Polygon polys = fact.createPolygon(cooord);
 				quadri.add(polys);
@@ -142,30 +157,14 @@ public class Conversion {
 	}
 
 
-	//Ecritur du fichier STL
-	public void ecrireSTL(int num) throws IOException{
-		FileOutputStream fos = new FileOutputStream("STL"+num+".stl");
-		DataOutputStream dos = new DataOutputStream(fos);
-		WriteSTL stl = new WriteSTL(liste_triangle,dos);
-		stl.ecrireCommentaire();
-		stl.ecrireNbTriangle();
-		stl.ecrireTriangles();
-		dos.close();
-		fos.close();
-	}
-
-
 	//Parcours tous les polygons pour retrouver la hauteur du polygon donne
-/*	public double hauteurPolygon(Polygon polys){
-		for(int i=0;i<liste_polygon.size();i++){
-			if(liste_polygon.get(i).overlaps(polys)){
-				System.out.println(i+" - "+liste_hauteur);
-				return liste_hauteur.get(i);
-			}	
+	public double hauteurPolygon(Map<Geometry, Double> decoupe,Polygon polys){
+		for(Entry<Geometry, Double> entry : decoupe.entrySet()) {
+			if(entry.getKey().equals(polys)){
+				return entry.getValue();
+			}
 		}
-		System.out.println(polys);
-		System.out.println("zero");
 		return 0;
-	}*/
+	}
 }
 
