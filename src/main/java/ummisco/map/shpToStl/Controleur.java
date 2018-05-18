@@ -43,6 +43,7 @@ public class Controleur implements ActionListener{
 			if(liste_shapefile.size()!=0){
 				fenetre.setVisible(false);
 				InterfaceValidation interval = new InterfaceValidation(liste_shapefile,fenetre);
+				interval.fenetreApp();
 			}
 		}
 		else{

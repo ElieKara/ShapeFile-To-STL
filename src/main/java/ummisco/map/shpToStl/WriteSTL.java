@@ -7,14 +7,17 @@ import java.util.ArrayList;
 
 public class WriteSTL {
 
-	public WriteSTL(ArrayList<Triangle> tri, int num) throws IOException{
+	public WriteSTL(){}
+	
+	
+	//Ecrit le fichier STL
+	public void ecrireSTL(ArrayList<Triangle> tri, int num) throws IOException{
 		FileOutputStream fos = new FileOutputStream("STL"+num+".stl");
 		DataOutputStream dos = new DataOutputStream(fos);
 		ecrireCommentaire(dos);
 		ecrireNbTriangle(dos,tri.size());
 		ecrireTriangles(dos,tri);
 	}
-	
 	
 	//Ecrit le commentaire du fichier STL
 	public void ecrireCommentaire(DataOutputStream dos) throws IOException{

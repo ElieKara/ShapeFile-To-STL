@@ -58,6 +58,7 @@ public class ControleurValidation implements ActionListener{
 			fenetre.dispose();
 			fenetredebut.dispose();
 			Interface fenetre = new Interface();
+			fenetre.fenetreApp();
 		}
 	}
 }

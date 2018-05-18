@@ -47,7 +47,6 @@ public class InterfaceValidation {
 		this.decoupe = new JFormattedTextField(contrainte);
 		this.hauteur = new JTextField();
 		this.controleur = new ControleurValidation(fenetre2,fenetre,decoupe,hauteur,liste_shapefile);
-		this.fenetreApp();
 	}
 
 

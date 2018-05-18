@@ -32,7 +32,6 @@ public class Interface{
 		this.panel2 = new JPanel(new GridLayout(0,2));
 		this.scroll = new JScrollPane(panel2);
 		this.controleur = new Controleur(fenetre,panel2);
-		this.fenetreApp();
 	}
 
 

@@ -105,7 +105,7 @@ public class Conversion {
 	}
 
 	
-	//Convertit les polygones en triangle et les ecrit dans un fichier STL
+	//Convertit les polygones recupere avec le quadrillage en triangle et les ecrit dans un fichier STL
 	public void conversionTriangle(Map<Geometry, Double> decoupe,Geometry geo,ArrayList<Geometry> liste) throws IOException{
 		double haut = 0;
 		for(int i=0;i<liste.size();i++){	
@@ -123,7 +123,8 @@ public class Conversion {
 					gtt.polygonSTL(listepolys.get(j),haut);
 				}
 			}
-			WriteSTL write = new WriteSTL(gtt.getListeTriangle(),i);
+			WriteSTL write = new WriteSTL();
+			write.ecrireSTL(gtt.getListeTriangle(), i);
 			gtt.videListe();
 		}
 	}
