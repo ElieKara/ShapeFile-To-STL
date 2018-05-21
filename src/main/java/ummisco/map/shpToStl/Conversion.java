@@ -41,7 +41,12 @@ public class Conversion {
 				if(geom instanceof Polygon){
 					Polygon polys = (Polygon) geom;
 					if(!hauteur.equals("Error")){
-						liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
+						if(feature.getAttribute(hauteur)!=null)
+							liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
+						else{
+							hauteur="Error";
+							liste_polygon.put(polys,0.0);
+						}
 					}
 					else
 						liste_polygon.put(polys,0.0);
@@ -51,7 +56,12 @@ public class Conversion {
 					ArrayList<Polygon> listepoly = gtt.decomposeMultiPolygon(mp);
 					if(!hauteur.equals("Error")){
 						for(Polygon polys:listepoly){
-							liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
+							if(feature.getAttribute(hauteur)!=null)
+								liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
+							else{
+								hauteur="Error";
+								liste_polygon.put(polys,0.0);
+							}
 						}
 					}
 					else{
