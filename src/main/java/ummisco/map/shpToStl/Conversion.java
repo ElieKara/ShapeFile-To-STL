@@ -17,22 +17,20 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class Conversion {
 
-	private ArrayList<File> liste_shapefile = new ArrayList<File>();
-	private Map<Geometry,Double> liste_polygon= new HashMap<Geometry,Double>();
 	private GeometryToTriangle gtt;
 	private double coupe;
 	private String hauteur;
 
-	public Conversion(ArrayList<File> liste_shapefile,int coupe, String hauteur){
+	public Conversion(int coupe, String hauteur){
 		this.coupe=coupe*0.01;
-		this.liste_shapefile=liste_shapefile;
 		this.hauteur=hauteur;
 		this.gtt = new GeometryToTriangle();
 	}
 
 
 	//Parcours les fichiers shapefiles et stock les Polygons et leur hauteur
-	public void parcoursFichier() throws IOException{
+	public void parcoursFichier(ArrayList<File> liste_shapefile) throws IOException{
+		Map<Geometry,Double> liste_polygon= new HashMap<Geometry,Double>();
 		for(int i=0;i<liste_shapefile.size();i++){
 			ShpFile file = new ShpFile(liste_shapefile.get(i));
 			ArrayList<SimpleFeature> features = file.readFile();
@@ -72,12 +70,12 @@ public class Conversion {
 				}
 			}
 		}
-		regroupePolygon();
+		regroupePolygon(liste_polygon);
 	}
 
 
 	//Regroupe tous les polygons dans un MultiPolygon puis le met en Geometry
-	public void regroupePolygon() throws IOException{
+	public void regroupePolygon(Map<Geometry,Double> liste_polygon) throws IOException{
 		Polygon[] tab_polys = new Polygon[liste_polygon.keySet().size()];
 		int ii = 0;
 		for(Geometry p:liste_polygon.keySet()){
@@ -86,18 +84,18 @@ public class Conversion {
 		}
 		GeometryFactory factory = new GeometryFactory();
 		Geometry geo = factory.createMultiPolygon(tab_polys);
-		decoupeGeometry(geo);
+		decoupeGeometry(geo,liste_polygon);
 	}
 	
 
-	//Divise la Geometry avec le quadrillage
-	public void decoupeGeometry(Geometry geo) throws IOException{
+	//Divise la Geometry avec le quadrillage et stock les hauteurs
+	public void decoupeGeometry(Geometry geo,Map<Geometry,Double> liste_polygon) throws IOException{
 		Map<Geometry, Double> myMap = new HashMap<Geometry,Double>();
 		Geometry limite = geo.getEnvelope();
 		Coordinate[] coord = limite.getCoordinates();
 		ArrayList<Geometry> liste = quadrillage(coord[0],coord[2],coord[1],coupe);
 		for(Geometry cell:liste)
-			for(Entry<Geometry, Double> current:this.liste_polygon.entrySet()){
+			for(Entry<Geometry, Double> current:liste_polygon.entrySet()){
 				Geometry res =cell.intersection(current.getKey());
 				ArrayList<Geometry> tempRes = new ArrayList<Geometry>();
 				if(res != null)

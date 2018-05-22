@@ -48,9 +48,9 @@ public class ControleurValidation implements ActionListener{
 				haut="Error";
 			else
 				haut = hauteur.getText();
-			Conversion conv = new Conversion(liste_shapefile,coupe,haut);	
+			Conversion conv = new Conversion(coupe,haut);	
 			try {
-				conv.parcoursFichier();
+				conv.parcoursFichier(liste_shapefile);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
