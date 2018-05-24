@@ -40,14 +40,16 @@ public class ControleurValidation implements ActionListener{
 		if(text.equals("OK")){
 			int coupe;
 			String haut;
-			if(decoupe.getText().equals(""))
-				coupe=0;
+			String coupetxt = decoupe.getText().toString().replaceAll(" ", "");
+			if(decoupe.getText().equals("") || decoupe.getText().equals("0"))
+				coupe=1;
 			else
-				coupe = Integer.parseInt(decoupe.getText());
+				coupe = Integer.parseInt(coupetxt);
 			if(hauteur.getText().equals(""))
 				haut="Error";
 			else
 				haut = hauteur.getText();
+			
 			Conversion conv = new Conversion(coupe,haut);	
 			try {
 				conv.parcoursFichier(liste_shapefile);

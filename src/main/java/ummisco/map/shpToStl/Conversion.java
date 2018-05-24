@@ -76,25 +76,33 @@ public class Conversion {
 
 	//Regroupe tous les polygons dans un MultiPolygon puis le met en Geometry
 	public void regroupePolygon(Map<Geometry,Double> liste_polygon) throws IOException{
-		Polygon[] tab_polys = new Polygon[liste_polygon.keySet().size()];
+
+		Map<Geometry,Double> listepoly= new HashMap<Geometry,Double>();
 		int ii = 0;
-		for(Geometry p:liste_polygon.keySet()){
+		for(Entry<Geometry, Double> entry : liste_polygon.entrySet()){
+			if(entry.getKey().isValid()){
+				listepoly.put(entry.getKey(),entry.getValue());
+			}	
+		}
+		Polygon[] tab_polys = new Polygon[listepoly.keySet().size()];
+		for(Geometry p:listepoly.keySet()){
 			tab_polys[ii] = (Polygon)p;
 			ii++;
 		}
 		GeometryFactory factory = new GeometryFactory();
 		Geometry geo = factory.createMultiPolygon(tab_polys);
-		decoupeGeometry(geo,liste_polygon);
+		decoupeGeometry(geo,listepoly);
 	}
-	
+
 
 	//Divise la Geometry avec le quadrillage et stock les hauteurs
 	public void decoupeGeometry(Geometry geo,Map<Geometry,Double> liste_polygon) throws IOException{
+		int cpt=0;
 		Map<Geometry, Double> myMap = new HashMap<Geometry,Double>();
 		Geometry limite = geo.getEnvelope();
 		Coordinate[] coord = limite.getCoordinates();
 		ArrayList<Geometry> liste = quadrillage(coord[0],coord[2],coord[1],coupe);
-		for(Geometry cell:liste)
+		for(Geometry cell:liste){
 			for(Entry<Geometry, Double> current:liste_polygon.entrySet()){
 				Geometry res =cell.intersection(current.getKey());
 				ArrayList<Geometry> tempRes = new ArrayList<Geometry>();
@@ -107,16 +115,25 @@ public class Conversion {
 					else 
 						tempRes.add(res);
 				for(Geometry g:tempRes)
-					myMap.put(g, current.getValue());		
+					myMap.put(g, current.getValue());	
 			}
-		conversionTriangle(myMap,geo,liste);
+			for(Entry<Geometry, Double> entry : myMap.entrySet()){
+				gtt.polygonSTL((Polygon)entry.getKey(), entry.getValue());
+			}
+			WriteSTL write = new WriteSTL();
+			write.ecrireSTL(gtt.getListeTriangle(), cpt);
+			gtt.videListe();
+			cpt++;
+			myMap.clear();
+		}
+		//conversionTriangle(myMap,geo,liste);
 	}
 
-	
+
 	//Convertit les polygones recupere avec le quadrillage en triangle et les ecrit dans un fichier STL
 	public void conversionTriangle(Map<Geometry, Double> decoupe,Geometry geo,ArrayList<Geometry> liste) throws IOException{
 		double haut = 0;
-		for(int i=0;i<liste.size();i++){	
+		for(int i=0;i<liste.size();i++){
 			Geometry res = geo.intersection(liste.get(i));
 			if(res instanceof Polygon){
 				Polygon respoly = (Polygon) res;
@@ -136,7 +153,7 @@ public class Conversion {
 			gtt.videListe();
 		}
 	}
-		
+
 
 	//Retourne le quadrillage de la Geometry
 	public ArrayList<Geometry> quadrillage(Coordinate min, Coordinate max,Coordinate minmax, double coupe){
