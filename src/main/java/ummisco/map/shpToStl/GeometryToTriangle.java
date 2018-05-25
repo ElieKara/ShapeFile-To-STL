@@ -19,8 +19,10 @@ public class GeometryToTriangle {
 		Polygon polys;
 		ArrayList<Polygon> liste_polygon = new ArrayList<Polygon>();
 		for (int i = 0; i < mp.getNumGeometries(); i++) {
-			polys = ((Polygon)mp.getGeometryN(i));
-			liste_polygon.add(polys);
+			if(mp.getGeometryN(i).isValid()){
+				polys = ((Polygon)mp.getGeometryN(i));
+				liste_polygon.add(polys);
+			}
 		}
 		return liste_polygon;
 	}
