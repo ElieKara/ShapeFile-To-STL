@@ -30,7 +30,7 @@ public class Conversion {
 	}
 
 
-	//Parcours les fichiers shapefiles et stock les Polygons et leur hauteur
+	//Parcours les fichiers shapefiles et decompose les geometry en Polygon et les stock avec leur hauteur
 	public void parcoursFichier(ArrayList<File> liste_shapefile) throws IOException{
 		Map<Geometry,Double> liste_polygon= new HashMap<Geometry,Double>();
 		for(int i=0;i<liste_shapefile.size();i++){
@@ -58,11 +58,13 @@ public class Conversion {
 					ArrayList<Polygon> listepoly = gtt.decomposeMultiPolygon(mp);
 					if(!hauteur.equals("Error")){
 						for(Polygon polys:listepoly){
-							if(feature.getAttribute(hauteur)!=null)
-								liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
-							else{
-								hauteur="Error";
-								liste_polygon.put(polys,0.0);
+							if(polys.isValid()){
+								if(feature.getAttribute(hauteur)!=null)
+									liste_polygon.put(polys,(((Number)feature.getAttribute(hauteur)).doubleValue()));
+								else{
+									hauteur="Error";
+									liste_polygon.put(polys,0.0);
+								}
 							}
 						}
 					}
@@ -108,8 +110,8 @@ public class Conversion {
 		}
 		return new_liste_polygon;
 	}
-	
-	
+
+
 	//Regroupe tous les polygons valide dans un MultiPolygon puis le met en Geometry
 	public Geometry regroupePolygon(Map<Geometry,Double> liste_polygon) throws IOException{
 		int ii = 0;
@@ -122,41 +124,58 @@ public class Conversion {
 		Geometry geo = factory.createMultiPolygon(tab_polys);
 		return geo;
 	}
-	
+
 
 	//Divise la Geometry avec le quadrillage et l'ecrit le fichier STL
 	public void decoupeGeometry(Geometry geo,Map<Geometry,Double> liste_polygon) throws IOException{
 		int cpt=0;
 		Map<Geometry, Double> myMap = new HashMap<Geometry,Double>();
+		Map<Geometry, Double> valide2 = new HashMap<Geometry,Double>();
 		Geometry limite = geo.getEnvelope();
 		Coordinate[] coord = limite.getCoordinates();
 		ArrayList<Geometry> liste = quadrillage(coord[0],coord[2],coord[1],coupe);
+		for(Entry<Geometry, Double> current:liste_polygon.entrySet()){
+			if(!current.getKey().isValid()){
+				ArrayList<Geometry> valide =gtt.decomposePolygon(current.getKey());
+				for(int i=0;i<valide.size();i++){
+					valide2.put(valide.get(i), current.getValue());
+				}
+			}
+		}
+		for(Entry<Geometry, Double> current:valide2.entrySet()){
+			liste_polygon.put(current.getKey(), current.getValue());
+		}
 		for(Geometry cell:liste){
 			for(Entry<Geometry, Double> current:liste_polygon.entrySet()){
 				if(current.getKey().isValid()){
-				Geometry res =cell.intersection(current.getKey());
-				ArrayList<Geometry> tempRes = new ArrayList<Geometry>();
-				if(res != null)
-					if(res instanceof MultiPolygon){
-						MultiPolygon resmul = (MultiPolygon) res;
-						ArrayList<Polygon> listepolys = gtt.decomposeMultiPolygon(resmul);
-						tempRes.addAll(listepolys);
+					Geometry res =cell.intersection(current.getKey());
+					if(!res.equals(cell)){
+					ArrayList<Geometry> tempRes = new ArrayList<Geometry>();
+					if(res != null)
+						if(res instanceof MultiPolygon){
+							MultiPolygon resmul = (MultiPolygon) res;
+							ArrayList<Polygon> listepolys = gtt.decomposeMultiPolygon(resmul);
+							tempRes.addAll(listepolys);
+						}
+						else 
+							tempRes.add(res);
+					for(Geometry g:tempRes)
+						myMap.put(g, current.getValue());
 					}
-					else 
-						tempRes.add(res);
-				for(Geometry g:tempRes)
-					myMap.put(g, current.getValue());
+				}
 			}
-			}
+
+
 			for(Entry<Geometry, Double> entry : myMap.entrySet()){
 				gtt.polygonSTL((Polygon)entry.getKey(), entry.getValue());
 			}
+			gtt.polygonSTL((Polygon)cell, 0);
 			WriteSTL write = new WriteSTL();
 			write.ecrireSTL(gtt.getListeTriangle(), cpt);
 			gtt.videListe();
 			cpt++;
 			myMap.clear();
-		}
+		}	
 	}
 
 
@@ -198,4 +217,3 @@ public class Conversion {
 		return 0;
 	}
 }
-

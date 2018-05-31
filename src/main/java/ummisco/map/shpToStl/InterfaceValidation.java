@@ -42,7 +42,7 @@ public class InterfaceValidation {
 		this.label = new JLabel("ShapeFile to STL");
 		this.label2 = new JLabel("DECOUPAGE");
 		this.label4 = new JLabel("Taille des morceaux (cm) :");
-		this.label3 = new JLabel("Nom de la variable pour la hauteur : ");
+		this.label3 = new JLabel("Nom de la variable pour l'altitude : ");
 		this.label5 = new JLabel("Taille de la maquette (cm) : ");
 		this.panel2 = new JPanel(new GridLayout(0,2));
 		this.contrainte = NumberFormat.getIntegerInstance();
