@@ -138,15 +138,20 @@ public class Conversion {
 			if(!current.getKey().isValid()){
 				ArrayList<Geometry> valide =gtt.decomposePolygon(current.getKey());
 				for(int i=0;i<valide.size();i++){
+					if(!valide.get(i).isValid()){
+						
+					}
+				}
+				for(int i=0;i<valide.size();i++){
 					valide2.put(valide.get(i), current.getValue());
 				}
 			}
-		}
-		for(Entry<Geometry, Double> current:valide2.entrySet()){
-			liste_polygon.put(current.getKey(), current.getValue());
+			else{
+				valide2.put(current.getKey(), current.getValue());
+			}
 		}
 		for(Geometry cell:liste){
-			for(Entry<Geometry, Double> current:liste_polygon.entrySet()){
+			for(Entry<Geometry, Double> current:valide2.entrySet()){
 				if(current.getKey().isValid()){
 					Geometry res =cell.intersection(current.getKey());
 					if(!res.equals(cell)){
@@ -164,12 +169,10 @@ public class Conversion {
 					}
 				}
 			}
-
-
 			for(Entry<Geometry, Double> entry : myMap.entrySet()){
-				gtt.polygonSTL((Polygon)entry.getKey(), entry.getValue());
+				gtt.polygonSTL((Polygon)entry.getKey(), entry.getValue(),2.0);
 			}
-			gtt.polygonSTL((Polygon)cell, 0);
+			gtt.polygonSTL((Polygon)cell,2.0,0.0);
 			WriteSTL write = new WriteSTL();
 			write.ecrireSTL(gtt.getListeTriangle(), cpt);
 			gtt.videListe();

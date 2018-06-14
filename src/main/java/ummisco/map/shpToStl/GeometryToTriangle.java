@@ -57,8 +57,8 @@ public class GeometryToTriangle {
 
 
 	//Recupere tous les triangles qui composent le polygon et les convertie en Triangle
-	public void polygonSTL(Polygon polys,double haut){
-		epaisseurTriangle(polys,haut);
+	public void polygonSTL(Polygon polys,double haut,double bas){
+		epaisseurTriangle(polys,haut,bas);
 		ArrayList<Polygon> triangles = new ArrayList<Polygon>();
 		triangles = trianglePolygon(polys,triangles);
 		for(Polygon p:triangles){
@@ -66,7 +66,7 @@ public class GeometryToTriangle {
 			Point3D[] point2 = new Point3D[3];
 			Coordinate[] coord_triangle=p.getCoordinates();
 			for(int i=0;i<3;i++){
-				point[i] = new Point3D((float) coord_triangle[i].x,0.0f,(float) coord_triangle[i].y);
+				point[i] = new Point3D((float) coord_triangle[i].x,(float)bas,(float) coord_triangle[i].y);
 				if(haut!=0)
 					point2[i] = new Point3D((float) coord_triangle[i].x,(float)haut,(float) coord_triangle[i].y);
 			}
@@ -81,14 +81,14 @@ public class GeometryToTriangle {
 
 
 	//Construit les triangles pour l'épaisseur
-	public void epaisseurTriangle(Polygon polys, double hauteur){
+	public void epaisseurTriangle(Polygon polys, double hauteur,double bas){
 		for(int i=0;i<polys.getNumPoints()-1;i++){
 			Point3D[] point = new Point3D[3];
 			Point3D[] point2 = new Point3D[3];
 			Coordinate[] coord_polys=polys.getCoordinates();
-			point[0]= new Point3D ((float) coord_polys[i].x,0.0f,(float) coord_polys[i].y);
+			point[0]= new Point3D ((float) coord_polys[i].x,(float)bas,(float) coord_polys[i].y);
 			point2[0]= new Point3D ((float) coord_polys[i].x,(float)hauteur,(float) coord_polys[i].y);
-			point[1]= new Point3D ((float) coord_polys[i+1].x,0.0f,(float) coord_polys[i+1].y);
+			point[1]= new Point3D ((float) coord_polys[i+1].x,(float)bas,(float) coord_polys[i+1].y);
 			point2[1]= new Point3D ((float) coord_polys[i+1].x,(float)hauteur,(float) coord_polys[i+1].y);
 			point[2]= point2[1];
 			point2[2]= point[0];
