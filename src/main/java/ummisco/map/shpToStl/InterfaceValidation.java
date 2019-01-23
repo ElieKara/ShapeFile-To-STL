@@ -23,7 +23,9 @@ public class InterfaceValidation {
 	private JLabel label2;
 	private JLabel label3;
 	private JLabel label4;
+	private JLabel label5;
 	private JFormattedTextField decoupe;
+	private JFormattedTextField taille;
 	private JTextField hauteur;
 	private JButton retour;
 	private JButton ok;
@@ -39,14 +41,16 @@ public class InterfaceValidation {
 		this.couleur = new Color(250,250,250);
 		this.label = new JLabel("ShapeFile to STL");
 		this.label2 = new JLabel("DECOUPAGE");
-		this.label4 = new JLabel("Taille maquette (cm) :");
-		this.label3 = new JLabel("Nom de la variable pour la hauteur : ");
+		this.label4 = new JLabel("Taille des morceaux (cm) :");
+		this.label3 = new JLabel("Nom de la variable pour l'altitude : ");
+		this.label5 = new JLabel("Taille de la maquette (cm) : ");
 		this.panel2 = new JPanel(new GridLayout(0,2));
 		this.contrainte = NumberFormat.getIntegerInstance();
 		this.contrainte.setMaximumFractionDigits(0);
 		this.decoupe = new JFormattedTextField(contrainte);
+		this.taille = new JFormattedTextField(contrainte);
 		this.hauteur = new JTextField();
-		this.controleur = new ControleurValidation(fenetre2,fenetre,decoupe,hauteur,liste_shapefile);
+		this.controleur = new ControleurValidation(fenetre2,fenetre,decoupe,taille,hauteur,liste_shapefile);
 	}
 
 
@@ -64,9 +68,12 @@ public class InterfaceValidation {
 		label2.setHorizontalAlignment(JLabel.CENTER);
 		label3.setHorizontalAlignment(JLabel.CENTER);
 		label4.setHorizontalAlignment(JLabel.CENTER);
+		label5.setHorizontalAlignment(JLabel.CENTER);
 		panel2.setBackground(couleur);
 		panel2.add(label2);
 		panel2.add(new JLabel());
+		panel2.add(label5);
+		panel2.add(taille);
 		panel2.add(label4);
 		panel2.add(decoupe);
 		panel2.add(label3);

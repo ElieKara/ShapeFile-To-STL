@@ -18,13 +18,15 @@ public class ControleurValidation implements ActionListener{
 	private JFrame fenetre;
 	private JFrame fenetredebut;
 	private JFormattedTextField decoupe;
+	private JFormattedTextField taille;
 	private JTextField hauteur;
 
-	public ControleurValidation(JFrame fenetredebut,JFrame fenetre,JFormattedTextField decoupe,JTextField hauteur,ArrayList<File> liste_shapefile ){
+	public ControleurValidation(JFrame fenetredebut,JFrame fenetre,JFormattedTextField decoupe,JFormattedTextField taille,JTextField hauteur,ArrayList<File> liste_shapefile ){
 		this.fenetre=fenetre;
 		this.fenetredebut=fenetredebut;
 		this.liste_shapefile=liste_shapefile;
 		this.decoupe=decoupe;
+		this.taille=taille;
 		this.hauteur=hauteur;
 	}
 
@@ -38,19 +40,27 @@ public class ControleurValidation implements ActionListener{
 			fenetre.setVisible(false);
 		}
 		if(text.equals("OK")){
+			int taillle;
 			int coupe;
 			String haut;
-			if(decoupe.getText().equals(""))
-				coupe=0;
+			String coupetxt = decoupe.getText().toString().replaceAll(" ", "");
+			String coupetxt2 = taille.getText().toString().replaceAll(" ", "");
+			if(taille.getText().equals("") || taille.getText().equals("0"))
+				taillle=1;
 			else
-				coupe = Integer.parseInt(decoupe.getText());
+				taillle=Integer.parseInt(coupetxt2);
+			if(decoupe.getText().equals("") || decoupe.getText().equals("0"))
+				coupe=1;
+			else
+				coupe = Integer.parseInt(coupetxt);
 			if(hauteur.getText().equals(""))
 				haut="Error";
 			else
 				haut = hauteur.getText();
-			Conversion conv = new Conversion(liste_shapefile,coupe,haut);	
+			
+			Conversion conv = new Conversion(coupe,taillle,haut);	
 			try {
-				conv.parcoursFichier();
+				conv.parcoursFichier(liste_shapefile);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
